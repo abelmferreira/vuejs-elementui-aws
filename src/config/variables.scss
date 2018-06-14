@@ -1,0 +1,24 @@
+/* Colors */
+$nav-toggle-color: #0E5FC2;
+$primary-color: #21CF5F;
+
+$footer-height: 30px;
+$header-height: 70px;
+$header-logo-width: 120px;
+
+/* BreakPoints */
+$screen-xs-min: 360px;  // Mobile devices
+$screen-sm-min: 576px;  // Small tablets and large smartphones (landscape view)
+$screen-md-min: 768px;  // Small tablets (portrait view)
+$screen-lg-min: 992px;  // Tablets and small desktops
+$screen-xl-min: 1200px; // Large tablets and desktops
+
+
+/* Export to JS file */
+:export {
+  maxMobileStyleSize: $screen-md-min;
+  headerHeight: $header-height;
+  footerHeight: $footer-height;
+}
+/* And create same vars to scss files  */
+$maxMobileStyleSize: $screen-md-min

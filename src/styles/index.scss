@@ -1,0 +1,98 @@
+@import '@/config/variables.scss';
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  color: $primary-color;
+}
+
+a {
+  text-decoration: none;
+}
+
+.main-container {
+  text-align: center;
+  min-height: 50vh;
+}
+
+/* classes para os buttons de ação no final dos formulários */
+.actions-buttons {
+  width: 100%;
+  text-align: center;
+  align-content: center;
+  margin-top: 10px;
+  border-top: 1px #ccc solid;
+  padding-top: 10px;
+}
+
+.actions-buttons button {
+  margin-bottom: 10px;
+  margin-right: 10px;
+  margin-left: 0px;
+  width: 160px;
+}
+
+.actions-buttons-fullWidth button {
+  width: 90%;
+}
+
+.el-button + .el-button, .actions-buttons > .el-button:not(:first-child) {
+  margin-left: 0;
+}
+
+.actions-buttons a:link {
+  text-decoration: none;
+}
+
+.el-button--primary {
+  background-color: #00AFEF;
+}
+
+/* classes para adicionar opções extras relacionadas com campos de formuários */
+.form-input-extra-option-link {
+  color: #ccc;
+  font-size: 12px;
+}
+
+.form-input-extra-option-link-red{
+  color: #f56c6c;
+  font-size: 12px;
+}
+
+.form-input-extra-option {
+  text-align: right;
+  line-height: 20px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* altera o width padrão do componente message do element.io */
+.el-message {
+  min-width: 85%;
+  font-size: 11px;
+  font-weight: normal;
+}
+
+.el-message-box {
+  width: 85% !important;
+}
+
+/* altera o footer do element.io */
+.el-footer {
+  position: absolute;
+  bottom:0;
+  width:100%;
+  border-top: solid 1px #e6e6e6;
+  text-align: center;
+  font-size: 12px;
+}
