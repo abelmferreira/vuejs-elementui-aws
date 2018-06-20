@@ -13,10 +13,21 @@ It has a simple layer to protect routes that need authentication.
 
 And small helper for sending notifications messages to user with vuex and element-ui
 
+
+
+Baseado em 
+https://aws.github.io/aws-amplify
+https://github.com/aws/aws-amplify
+https://github.com/aws-samples/aws-amplify-vue
+https://github.com/aws-samples/aws-serverless-workshops/tree/master/WebApplication
+https://codeburst.io/tutorial-for-building-a-web-application-with-amazon-s3-lambda-dynamodb-and-api-gateway-6d3ddf77f15a
+
+
+
 ## Try it
 ````
 # Clone project
-git clone https://github.com/abelmferreira/vujs-elementui-start.git
+git clone https://github.com/abelmferreira/vuejs-elementui-aws.git
 
 # install dependencies
 npm install

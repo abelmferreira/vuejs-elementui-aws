@@ -8,25 +8,38 @@ import '@/registerServiceWorker'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import '@/styles/index.scss'
-
 import locale from 'element-ui/lib/locale/lang/pt-br'
 
 import GlobalVariables from '@/config/variables'
 
+import Amplify, { Logger } from 'aws-amplify'
+import awsExports from './aws-exports'
+
 Vue.config.productionTip = false
 Vue.use(ElementUI, {locale})
 
-router.beforeEach((to, from, next) => {
-  if ((to.meta.requiresAuth && store.state.loggedin) || to.path.startsWith('/login')) {
-    next()
-  } else if (!to.meta.requiresAuth) {
-    next()
-  } else {
-    store.commit('Alerts/setError', 'Necessário fazer login para continuar')
-    next('/login')
-  }
-})
+Amplify.configure(awsExports)
+Amplify.Logger.LOG_LEVEL = 'DEBUG'
 
+const logger = new Logger('main')
+logger.debug('System Loaded')
+
+// Destroy session if lost user Token
+// setInterval(() => {
+//   Auth.currentUserInfo()
+//     .then(user => {
+//       if (user) {
+//         store.commit('User/setLoggedin')
+//         logger.debug(`User is logged in`)
+//       } else {
+//         store.commit('User/setUserLogout')
+//         logger.debug(`User is logged out`)
+//       }
+//     })
+//     .catch(err => logger.error(err))
+// }, 90000)
+
+// Mix global vars
 Vue.mixin({
   data: function () {
     return {

@@ -5,7 +5,7 @@ export default {
   addMessage (state, payload) {
     const msgid = `msg-id-${Math.random().toString(36).substring(2) + (new Date()).getTime().toString(36)}`
     if (typeof payload === 'string') {
-      payload = { id: msgid, message: payload, type: 'info', timeout: 164000 }
+      payload = { id: msgid, message: payload, type: 'info', timeout: 4000 }
     } else if (typeof payload === 'object') {
       payload.id = msgid
       payload.message = (payload.message || null)

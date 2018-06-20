@@ -14,14 +14,14 @@
           @select="handleSelect"
           :router="true">
 
-          <el-menu-item v-if="loggedin" index="/instances"> Instances </el-menu-item>
+          <el-menu-item v-if="loggedin" index="/instances" :route="{ name: 'Instances' }"> Instances </el-menu-item>
 
         </el-menu>
       </div>
 
       <div id="menulogin" :class="{ active: isActive }" v-if="menuModeShow">
         <el-menu id="el-menulogin" :mode="menuMode" @select="handleSelect" :router="true">
-          <el-menu-item v-if="!loggedin" index="/login" :route="{ name: 'Login' }"> Login </el-menu-item>
+          <el-menu-item v-if="!loggedin" index="/login"> Login </el-menu-item>
 
           <el-submenu v-if="loggedin" index="loggedMenu">
             <template slot="title">User</template>
