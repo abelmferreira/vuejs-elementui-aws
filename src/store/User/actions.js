@@ -7,6 +7,9 @@ const routeAfterLogout = '/login'
 const routeAfterConfirm = '/'
 const routeToConfirmCode = '/login/confirm'
 
+// Api Guide
+// https://aws.github.io/aws-amplify/media/authentication_guide
+
 const onError = (commit, err, title) => {
   logger.error(title, err)
   commit('Alerts/setError', `${title}: ${err.message}`, {root: true})
@@ -35,7 +38,7 @@ export default {
           commit('setUser', user)
           router.push(routeToConfirmCode)
         } else {
-          return dispatch('checkIfisUserVerified', user)
+          return dispatch('checkIfUserIsVerified', user)
         }
       })
       .then(user => {
@@ -43,7 +46,7 @@ export default {
         if (!user.verifiedUser) router.push('/login/confirm')
       })
       .then(user => {
-        return Auth.currentUserInfo()
+        return Auth.currentAuthenticatedUser()
       })
       .then(user => {
         commit('Alerts/setLoadingMessage', null, {root: true})
@@ -68,6 +71,14 @@ export default {
 
   userSignup ({commit}, payload) {
     // Auth.signUp(this.username, this.password, this.email, this.phone_number)
+    // Can pass attributes on sign up too:
+    // 'attributes': {
+    //   'email': 'me@domain.com',
+    //   'phone_number': '+12128601234', // E.164 number convention
+    //   'given_name': 'Jane',
+    //   'family_name': 'Doe',
+    //   'nickname': 'Jane'
+    // }
     return Auth.signUp(payload.username, payload.password, payload.email)
       .then(data => {
         logger.debug('Sign up Success!', data)
@@ -76,10 +87,34 @@ export default {
       .catch(err => onError(commit, err, 'userSignup Error'))
   },
 
-  // Verify if account is already verified
-  checkIfisUserVerified ({commit}, user) {
-    if (!user) return
+  userUpdateAttributes ({commit}, payload) {
+    console.log(payload)
+    return Auth.updateUserAttributes(payload.user, {
+      phone_number: payload.form.phone_number,
+      given_name: payload.form.given_name,
+      family_name: payload.form.family_name,
+      gender: payload.form.gender
+    })
+      .then(result => commit('Alerts/addMessage', 'User updated!', {root: true}))
+      .catch(err => onError(commit, err, 'userUpdateAttributes Error'))
+  },
 
+  // Verify if current user is authenticated with a valid token
+  checkIfUserisAuthenticated () {
+    return Auth.currentAuthenticatedUser()
+      .then(user => {
+        logger.debug('User is Authenticated!!', user)
+        return user
+      })
+      .catch(err => {
+        logger.debug('User not authenticated!!', err)
+        return false
+      })
+  },
+
+  // Verify if account is already verified
+  checkIfUserIsVerified ({commit}, user) {
+    if (!user) return
     return Auth.verifiedContact(user)
       .then(data => {
         logger.debug('Verify user result', data)
@@ -87,6 +122,32 @@ export default {
         user.verifiedUser = !JS.isEmpty(data.verified)
         return user
       })
+  },
+
+  // Get current user Credentials ID
+  getCurrentCredentialsID ({dispatch}) {
+    return dispatch('checkIfUserisAuthenticated')
+      .then(user => {
+        if (user) {
+          return Auth.currentCredentials()
+        } else {
+          throw new Error('not_autenticated')
+        }
+      })
+      .then(credentials => {
+        return credentials.identityId
+      })
+      .catch(err => {
+        logger.debug('User not authenticated!!', err)
+        return false
+      })
+  },
+
+  // Get current user info
+  getCurrentUserInfo () {
+    return Auth.currentUserInfo()
+      .then(user => user)
+      .catch(err => err)
   },
 
   mfaConfirmCode: ({commit}, payload) => {

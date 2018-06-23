@@ -1,14 +1,14 @@
 <template>
     <div>
       <h1>Login</h1>
-      <el-form ref="loginPassForm" :model="form" :rules="rules" label-width="0px">
+      <el-form ref="loginPassForm" :model="form" :rules="rules" label-width="0px" @keyup.enter.native="login">
 
         <el-form-item label="Username" prop="username">
-          <el-input v-model="form.username" auto-complete="off" required></el-input>
+          <el-input v-model="form.username" auto-complete="off" required autofocus></el-input>
         </el-form-item>
 
         <el-form-item label="Password" prop="password">
-          <el-input type="password" v-model="form.password" auto-complete="off" required></el-input>
+          <el-input type="password" v-model="form.password" auto-complete="off" required @keyup.enter="login"></el-input>
           <div class="form-input-extra-option" ><a @click="forgotPassword" class="form-input-extra-option-link">Forgot Password?</a> </div>
         </el-form-item>
 

@@ -24,21 +24,6 @@ Amplify.Logger.LOG_LEVEL = 'DEBUG'
 const logger = new Logger('main')
 logger.debug('System Loaded')
 
-// Destroy session if lost user Token
-// setInterval(() => {
-//   Auth.currentUserInfo()
-//     .then(user => {
-//       if (user) {
-//         store.commit('User/setLoggedin')
-//         logger.debug(`User is logged in`)
-//       } else {
-//         store.commit('User/setUserLogout')
-//         logger.debug(`User is logged out`)
-//       }
-//     })
-//     .catch(err => logger.error(err))
-// }, 90000)
-
 // Mix global vars
 Vue.mixin({
   data: function () {

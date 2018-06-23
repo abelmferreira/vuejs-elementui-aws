@@ -13,6 +13,8 @@ import Signup from '@/views/Auth/Signup.vue'
 import Confirm from '@/views/Auth/Confirm.vue'
 import ForgotPass from '@/views/Auth/ForgotPass.vue'
 import Logout from '@/views/Auth/Logout.vue'
+import Profile from '@/views/Auth/Profile.vue'
+
 import Instances from '@/views/Instances.vue'
 
 Vue.use(Router)
@@ -73,6 +75,12 @@ const router = new Router({
       meta: { requiresAuth: false }
     },
     {
+      path: '/profile',
+      name: 'Profile',
+      component: Profile,
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/instances',
       name: 'Instances',
       component: Instances,
@@ -83,7 +91,8 @@ const router = new Router({
 })
 
 router.beforeEach((to, from, next) => {
-  if ((to.meta.requiresAuth && Store.state.loggedin) || to.path.startsWith('/login')) {
+  // If has problem with this logic... try action checkIfUserisAuthenticated
+  if ((to.meta.requiresAuth && Store.state.User.loggedin) || to.path.startsWith('/login')) {
     next()
   } else if (!to.meta.requiresAuth) {
     next()

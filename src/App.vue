@@ -5,7 +5,8 @@
       <header-bar
         :maxMobileStyleSize="this.gVar.maxMobileStyleSize"
         title="AWS"
-        :loggedin="loggedin" />
+        :loggedin="loggedin"
+        :user="user" />
     </el-header>
 
     <el-main class="main-container">
@@ -33,7 +34,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('User', ['loggedin']),
+    ...mapState('User', ['loggedin', 'user']),
     ...mapState('Alerts', ['loading', 'messages', 'error'])
   },
   watch: {

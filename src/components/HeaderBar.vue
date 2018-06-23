@@ -24,7 +24,8 @@
           <el-menu-item v-if="!loggedin" index="/login"> Login </el-menu-item>
 
           <el-submenu v-if="loggedin" index="loggedMenu">
-            <template slot="title">User</template>
+            <template slot="title">{{ menuDisplayName }}</template>
+            <el-menu-item index="/profile">Profile</el-menu-item>
             <el-menu-item index="/logout">Logout</el-menu-item>
           </el-submenu>
         </el-menu>
@@ -59,6 +60,10 @@ export default {
       type: Boolean,
       default: false
     },
+    user: {
+      type: Object,
+      default: {}
+    },
     defaultActiveIndex: {
       type: String,
       default: '/'
@@ -67,6 +72,16 @@ export default {
       type: String,
       default: 'Vue.js'
     }
+  },
+  computed: {
+    menuDisplayName () {
+      if (this.loggedin) {
+        if (this.user.attributes && this.user.attributes.given_name) return this.user.attributes.given_name
+        if (this.user && this.user.username) return this.user.username
+      } else {
+        return ''
+      }
+    },
   },
   watch: {
     menuModeNew (value) {
