@@ -60,10 +60,7 @@ export default {
       type: Boolean,
       default: false
     },
-    user: {
-      type: Object,
-      default: {}
-    },
+    user: {},
     defaultActiveIndex: {
       type: String,
       default: '/'
@@ -81,7 +78,7 @@ export default {
       } else {
         return ''
       }
-    },
+    }
   },
   watch: {
     menuModeNew (value) {

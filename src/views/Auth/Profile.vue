@@ -10,7 +10,7 @@
 
         <!-- Simple Form component example /> -->
         <!-- <a-simple-form :path="'profiles/' + userId" :fields="fields" :theme="theme" v-if="userId" /> -->
-        
+
         <el-form-item label="Username" prop="username">
           <el-input v-model="form.username" auto-complete="off" required disabled></el-input>
         </el-form-item>
@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import {mapActions, mapMutations, mapState} from 'vuex'
+import {mapActions, mapState} from 'vuex'
 import PhotoPicker from '@/components/PhotoPicker.vue'
 
 export default {

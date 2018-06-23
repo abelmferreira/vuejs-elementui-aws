@@ -30,7 +30,7 @@
 <script>
 import { Storage, Logger } from 'aws-amplify'
 
-const logger = new Logger('SignOutComp');
+const logger = new Logger('SignOutComp')
 
 const pickerStyle = {
   picker: {
@@ -69,32 +69,29 @@ export default {
   props: {
     defSrc: {
       default: `avatar.png`
-     },
-     path: {
-       default: 'avatar/avatar.png'
-     }
+    },
+    path: {
+      default: 'avatar/avatar.png'
+    }
   },
   computed: {
-    pickerStyle() {
+    pickerStyle () {
       return pickerStyle
     }
   },
-  created: function() {
+  created: function () {
     this.getPhoto()
   },
   methods: {
-    getPhoto: function() {
+    getPhoto: function () {
       console.log(`get foto`, this.path)
       Storage.get(this.path, { level: 'protected' })
-        .then(url => {
-          console.log(url)
-          this.src = url
-        })
+        .then(url => { this.src = url })
     },
-    pick: function(e) {
-      const file = e.target.files[0];
-      const { name, size, type } = file;
-      logger.debug(file);
+    pick: function (e) {
+      const file = e.target.files[0]
+      const { name, size, type } = file
+      logger.debug(name, size, type)
 
       logger.debug('upload photo to ' + this.path)
       Storage.put(this.path, file, { contentType: type, level: 'protected' })
@@ -102,9 +99,9 @@ export default {
           logger.debug(data)
           this.getPhoto()
         })
-        .catch(err => logger.error(err));
+        .catch(err => logger.error(err))
     },
-    imageError: function(e) {
+    imageError: function (e) {
       this.src = this.defSrc
     }
   }
