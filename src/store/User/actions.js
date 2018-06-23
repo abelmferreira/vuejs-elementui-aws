@@ -22,6 +22,11 @@ const onLoginSuccess = (commit, user) => {
   router.push(routeAfterLogin)
 }
 
+const onNeedRedirect = (commit, user, to) => {
+  if (user) commit('setUser', user)
+  router.push(to)
+}
+
 export default {
   userLogin ({commit, dispatch}, payload) {
     commit('Alerts/setLoadingMessage', 'Authenticating', {root: true})
@@ -32,25 +37,26 @@ export default {
         return user
       })
       .then(user => {
-        // If has multi factory authentication, ret
-        if (user.challengeName === 'SMS_MFA') {
-          user.needConfirmCode = true
-          commit('setUser', user)
-          router.push(routeToConfirmCode)
-        } else {
-          return dispatch('checkIfUserIsVerified', user)
-        }
+        return dispatch('checkIfUserIsVerified', user)
       })
       .then(user => {
-        commit('setUserSession', user)
-        if (!user.verifiedUser) router.push('/login/confirm')
+        if (!user.verifiedUser) onNeedRedirect(commit, user, '/login/confirm')
+        return user
       })
       .then(user => {
-        return Auth.currentAuthenticatedUser()
+        return Auth.currentUserInfo()
+          .then(extraUserInfo => Object.assign(user, extraUserInfo))
       })
       .then(user => {
         commit('Alerts/setLoadingMessage', null, {root: true})
-        onLoginSuccess(commit, user)
+
+        // If has multi factory authentication, ret
+        if (user.challengeName === 'SMS_MFA') {
+          user.needConfirmCode = true
+          onNeedRedirect(commit, user, routeToConfirmCode)
+        } else {
+          onLoginSuccess(commit, user)
+        }
       })
       .catch(err => {
         commit('setUserLogout')

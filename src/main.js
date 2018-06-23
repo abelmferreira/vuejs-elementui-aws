@@ -19,7 +19,7 @@ Vue.config.productionTip = false
 Vue.use(ElementUI, {locale})
 
 Amplify.configure(awsExports)
-Amplify.Logger.LOG_LEVEL = 'DEBUG'
+Amplify.Logger.LOG_LEVEL = 'INFO'
 
 const logger = new Logger('main')
 logger.debug('System Loaded')

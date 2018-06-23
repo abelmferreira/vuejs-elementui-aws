@@ -4,6 +4,13 @@
       <br>
       <el-form ref="profileForm" :model="form" label-position="right" label-width="160px">
 
+        <el-form-item label="Avatar" prop="avatar">
+          <photo-picker :path="'avatars/' + userId" />
+        </el-form-item>
+
+        <!-- Simple Form component example /> -->
+        <!-- <a-simple-form :path="'profiles/' + userId" :fields="fields" :theme="theme" v-if="userId" /> -->
+        
         <el-form-item label="Username" prop="username">
           <el-input v-model="form.username" auto-complete="off" required disabled></el-input>
         </el-form-item>
@@ -41,9 +48,11 @@
 
 <script>
 import {mapActions, mapMutations, mapState} from 'vuex'
+import PhotoPicker from '@/components/PhotoPicker.vue'
 
 export default {
   name: 'Login',
+  components: { PhotoPicker },
   data () {
     return {
       form: {
@@ -57,7 +66,11 @@ export default {
     }
   },
   computed: {
-    ...mapState('User', ['loggedin', 'user', 'session'])
+    userId () {
+      console.log(this.user)
+      return this.user.id
+    },
+    ...mapState('User', ['loggedin', 'user'])
   },
   methods: {
     submit () {
