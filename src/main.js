@@ -30,6 +30,9 @@ Vue.mixin({
     return {
       get gVar () {
         return GlobalVariables
+      },
+      get aws () {
+        return awsExports
       }
     }
   }
