@@ -48,6 +48,14 @@ export default {
           .then(extraUserInfo => Object.assign(user, extraUserInfo))
       })
       .then(user => {
+        return Auth.currentCredentials()
+          .then(credentials => Object.assign(user, Auth.essentialCredentials(credentials)))
+      })
+      .then(user => {
+        return dispatch('DynamoDB/log', {user: user, action: 'User logged in'}, {root: true})
+          .then(() => user)
+      })
+      .then(user => {
         commit('Alerts/setLoadingMessage', null, {root: true})
 
         // If has multi factory authentication, ret
@@ -65,10 +73,19 @@ export default {
       })
   },
 
-  userLogout ({commit}) {
-    commit('setUserLogout')
+  userLogout ({commit, state, dispatch}) {
+    let cloneUser = { ...state.user }
+
+    dispatch('DynamoDB/log', {user: cloneUser, action: 'User logged out'}, {root: true})
+      .then(() => {
+        commit('DynamoDB/clearDatabases', null, {root: true})
+        commit('EC2/clearEC2', null, {root: true})
+      })
+      .catch(err => console.log('LogError', err))
+
     Auth.signOut()
       .then(() => {
+        commit('setUserLogout')
         logger.debug('Logout Success!')
         router.push(routeAfterLogout)
       })

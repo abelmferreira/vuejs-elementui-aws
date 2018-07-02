@@ -6,9 +6,8 @@
     <el-card class="box-card" v-for="instance in instancesData" v-bind:key="instance.InstanceId">
       <div slot="header" class="clearfix">
         <span> {{ instance.Name }} ( {{ instance.State }} )</span>
-        <el-button v-if ="instance.State === 'stopped'" style="float: right; padding: 3px 0" @click="turnOn(instance.InstanceId)">Turn On</el-button>
-        <el-button v-if ="instance.State === 'running'" style="float: right; padding: 3px 0" @click="turnOff(instance.InstanceId)">Turn Off</el-button>
-        <el-button style="float: right; padding: 3px 0" @click="refresh(instance.InstanceId)">Refresh</el-button>
+        <el-button v-if ="instance.State === 'stopped'" style="float: right; padding: 3px 0" @click="turnOn">Turn On</el-button>
+        <el-button v-if ="instance.State === 'running'" style="float: right; padding: 3px 0" @click="turnOff">Turn Off</el-button>
       </div>
       <div v-for="ip in instance.AllowRdpFromResumed" :key="ip" class="text item">
         RDP remote access allowed from {{ ip }}
@@ -22,6 +21,7 @@
 
 <script>
 import {mapState, mapActions} from 'vuex'
+// import { API } from 'aws-amplify'
 
 export default {
   name: 'Instances',
@@ -35,31 +35,13 @@ export default {
     ...mapState('User', ['user', 'loggedin'])
   },
   methods: {
-    ...mapActions('EC2', ['registerEC2', 'describeInstances', 'describeInstancesSecurityGroup']),
-    ...mapActions('EC2', ['startInstance', 'stopInstance']),
+    ...mapActions('EC2', ['describeInstances', 'describeInstancesSecurityGroup', 'registerEC2']),
     ...mapActions(['getMyPublicIP', 'findMyIP']),
-    turnOn (id) {
+    turnOn () {
       console.log('turnOn')
-      this.startInstance([id])
-        .then(data => {
-          console.log('start', data)
-        })
     },
-    turnOff (id) {
+    turnOff () {
       console.log('turnOff')
-      this.stopInstance([id])
-        .then(data => {
-          console.log('stop', data)
-        })
-    },
-    refresh (id) {
-      console.log('refresh')
-      this.describeInstances([id])
-        .then(instanceRefresh => {
-          console.log('refresh Instance', instanceRefresh[0].State)
-          const index = this.instancesData.findIndex(instanceData => instanceData.InstanceID === instanceRefresh.InstanceId)
-          this.instancesData[index].State = instanceRefresh[0].State
-        })
     },
     alloOnlyMyIP () {
       console.log('turnOff')
@@ -81,6 +63,31 @@ export default {
           instance.needProtectIp = this.findMyIP({myIp: myPubIp, ipArray: instance.AllowRdpFromResumed})
         })
       })
+
+    // // console.log(this.user)
+    // console.log(this.user.signInUserSession.accessToken.jwtToken)
+    // Auth.currentSession()
+    //   .then(session => console.log(session))
+
+    // let apiName = 'Ride'
+    // let path = '/instance'
+    // // let myInit = {
+    // //   headers: {
+    // //     Authorization: this.user.signInUserSession.accessToken.jwtToken
+    // //   },
+    // //   response: true,
+    // //   queryStringParameters: {}
+    // // }
+    // let myInit = {
+    //   response: true,
+    //   queryStringParameters: {}
+    // }
+
+    // API.get(apiName, path, myInit).then(response => {
+    //   console.log(response)
+    // }).catch(error => {
+    //   console.log(error)
+    // })
   }
 }
 

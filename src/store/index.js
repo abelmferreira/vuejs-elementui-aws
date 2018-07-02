@@ -5,6 +5,8 @@ import createPersistedState from 'vuex-persistedstate'
 import Shared from './Shared'
 import User from './User'
 import Alerts from './Alerts'
+import DynamoDB from './DynamoDB'
+import EC2 from './EC2'
 
 Vue.use(Vuex)
 
@@ -14,6 +16,8 @@ export default new Vuex.Store({
   modules: {
     Shared,
     User,
-    Alerts
+    Alerts,
+    DynamoDB,
+    EC2
   }
 })
