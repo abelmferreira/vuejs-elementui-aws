@@ -3,12 +3,12 @@
     <h1>Instances page</h1>
     <br>
 
-    <el-card class="box-card" v-for="instance in instancesData" v-bind:key="instance.InstanceId">
+    <el-card class="box-card" v-for="instance in instances" v-bind:key="instance.InstanceId">
       <div slot="header" class="clearfix">
-        <span> {{ instance.Name }} ( {{ instance.State }} )</span>
-        <el-button v-if ="instance.State === 'stopped'" style="float: right; padding: 3px 0" @click="turnOn(instance.InstanceId)">Turn On</el-button>
-        <el-button v-if ="instance.State === 'running'" style="float: right; padding: 3px 0" @click="turnOff(instance.InstanceId)">Turn Off</el-button>
-        <el-button style="float: right; padding: 3px 0" @click="refresh(instance.InstanceId)">Refresh</el-button>
+        <span> {{ instance.Name }} ( {{ instance.InstanceState }} )</span>
+        <el-button v-if ="instance.InstanceState === 'stopped'" style="float: right; padding: 3px 0" @click="turnOn(instance.InstanceId)">Turn On</el-button>
+        <el-button v-if ="instance.InstanceState === 'running'" style="float: right; padding: 3px 0" @click="turnOff(instance.InstanceId)">Turn Off</el-button>
+        <el-button style="float: right; padding: 3px 0" @click="describeInstanceStatus([instance.InstanceId])">Refresh</el-button>
       </div>
       <div v-for="ip in instance.AllowRdpFromResumed" :key="ip" class="text item">
         RDP remote access allowed from {{ ip }}
@@ -26,18 +26,17 @@ import {mapState, mapActions} from 'vuex'
 export default {
   name: 'Instances',
   data () {
-    return {
-      instancesData: [],
-      publicIp: 'analisando...'
-    }
+    return {}
   },
   computed: {
-    ...mapState('User', ['user', 'loggedin'])
+    ...mapState('User', ['user']),
+    ...mapState('EC2', ['instances']),
+    ...mapState('Shared', ['publicIp'])
   },
   methods: {
-    ...mapActions('EC2', ['registerEC2', 'describeInstances', 'describeInstancesSecurityGroup']),
-    ...mapActions('EC2', ['startInstance', 'stopInstance']),
-    ...mapActions(['getMyPublicIP', 'findMyIP']),
+    ...mapActions('EC2', ['registerEC2', 'describeInstances', 'describeInstanceStatus', 'describeInstancesSecurityGroup']),
+    ...mapActions('EC2', ['startInstance', 'stopInstance', 'checkMyIP']),
+    ...mapActions('Shared', ['getMyPublicIP']),
     turnOn (id) {
       console.log('turnOn')
       this.startInstance([id])
@@ -52,34 +51,19 @@ export default {
           console.log('stop', data)
         })
     },
-    refresh (id) {
-      console.log('refresh')
-      this.describeInstances([id])
-        .then(instanceRefresh => {
-          console.log('refresh Instance', instanceRefresh[0].State)
-          const index = this.instancesData.findIndex(instanceData => instanceData.InstanceID === instanceRefresh.InstanceId)
-          this.instancesData[index].State = instanceRefresh[0].State
-        })
-    },
     alloOnlyMyIP () {
-      console.log('turnOff')
+      console.log('alloOnlyMyIP')
     }
   },
   mounted () {
-    // Register EC2 State
     this.registerEC2(this.user)
       .then(ec2Conn => this.describeInstances())
-      .then(instances => this.describeInstancesSecurityGroup(instances))
-      .then(instances => {
-        console.log('instances2', instances)
-        this.instancesData = instances
-      })
-      .then(() => this.getMyPublicIP())
-      .then(myPubIp => {
-        this.publicIp = myPubIp
-        this.instancesData.forEach(instance => {
-          instance.needProtectIp = this.findMyIP({myIp: myPubIp, ipArray: instance.AllowRdpFromResumed})
-        })
+      .then(instances => this.describeInstancesSecurityGroup())
+      .then(instances => this.getMyPublicIP())
+      .then(myPubIp => this.checkMyIP())
+      .then(() => {
+        console.log('allDone', this.instances)
+        console.log('publicIp', this.publicIp)
       })
   }
 }

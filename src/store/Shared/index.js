@@ -1,24 +1,27 @@
 export default {
+  namespaced: true,
   state: {
+    publicIp: null
   },
   mutations: {
+    setPublicIp (state, ip) {
+      state.publicIp = ip
+    }
   },
   actions: {
-    getMyPublicIP () {
+    getMyPublicIP ({commit}) {
       return new Promise((resolve, reject) => {
         let xmlhttp = new XMLHttpRequest()
         const myUrl = 'https://api.ipify.org'
         xmlhttp.onreadystatechange = function () {
-          if (xmlhttp.readyState === 4 && xmlhttp.status === 200) resolve(xmlhttp.responseText)
+          if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+            commit('setPublicIp', xmlhttp.responseText)
+            resolve(xmlhttp.responseText)
+          }
         }
         xmlhttp.open('GET', myUrl, true)
         xmlhttp.send()
       })
-    },
-    // Check if ip address exist in a array
-    findMyIP ({state}, payload) {
-      let findIP = payload.ipArray.find(allowedIp => allowedIp === `${payload.myIp}/32`)
-      return (!findIP)
     }
   },
   getters: {

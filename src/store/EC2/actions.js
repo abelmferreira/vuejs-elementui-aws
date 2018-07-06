@@ -47,29 +47,63 @@ export default {
       state.ec2.describeInstances(params, function (err, data) {
         if (err) throw new Error(err)
 
-        let instancesData = []
-
-        console.log(data.Reservations[0].Instances)
+        let allInstancesData = []
 
         data.Reservations[0].Instances.forEach(instance => {
           let NameIndex = instance.Tags.findIndex(tag => tag.Key === 'name' || tag.Key === 'Name')
 
+          console.log(instance)
+
           // Create resumed respose data
-          instancesData.push({
+          let singleInstanceData = {
             Name: (instance.Tags[NameIndex].Value),
             InstanceId: instance.InstanceId,
             InstanceType: instance.InstanceType,
             LaunchTime: timeConverter(instance.LaunchTime),
             PubIpAddress: instance.PublicIpAddress,
             IpAddress: instance.PrivateIpAddress,
-            State: instance.State.Name,
-            StateReason: instance.StateReason,
-            Sg: instance.SecurityGroups,
-            SgNames: instance.SecurityGroups.map(sg => sg.GroupName)
-          })
+            InstanceState: instance.State.Name,
+            InstanceStateReason: instance.StateReason,
+            InstanceSg: instance.SecurityGroups,
+            InstanceSgNames: instance.SecurityGroups.map(sg => sg.GroupName)
+          }
+
+          allInstancesData.push(singleInstanceData)
+          commit('setInstance', singleInstanceData)
         })
-        commit('setInstance', instancesData)
-        resolve(instancesData)
+
+        resolve(allInstancesData)
+      })
+    })
+  },
+
+  describeInstanceStatus ({commit, state}, instances = []) {
+    if (!state.ec2) throw new Error('EC2 not registered!')
+    if (instances.length < 1) throw new Error('Empty list!')
+
+    const params = {
+      DryRun: false,
+      InstanceIds: instances,
+      IncludeAllInstances: true
+    }
+
+    return new Promise(resolve => {
+      state.ec2.describeInstanceStatus(params, function (err, data) {
+        if (err) throw new Error(err)
+
+        let allInstancesData = []
+        data.InstanceStatuses.forEach(instance => {
+          let singleInstanceData = {
+            InstanceId: instance.InstanceId,
+            InstanceState: instance.InstanceState.Name,
+            InstanceStatus: instance.InstanceStatus.Status,
+            SystemStatus: instance.SystemStatus.Status
+          }
+          allInstancesData.push(singleInstanceData)
+          commit('updateInstance', singleInstanceData)
+        })
+
+        resolve(allInstancesData)
       })
     })
   },
@@ -88,8 +122,9 @@ export default {
   },
 
   // Return a Formated Instance Object with Security Group Informations
-  describeInstancesSecurityGroup ({commit, dispatch}, instances = []) {
+  describeInstancesSecurityGroup ({state, commit, dispatch}, instances = []) {
     // If empty instances
+    if (instances.length < 1) instances = state.instances
     if (instances.length < 1) throw new Error('Empty list!')
 
     // Get detailed Security Group Information
@@ -99,16 +134,16 @@ export default {
 
       return new Promise((resolve, reject) => {
         // Get Security Group Datails from instance list
-        dispatch('describeSecurityGroups', instance.SgNames)
+        dispatch('describeSecurityGroups', instance.InstanceSgNames)
           .then(sgs => {
             // For each SG Name... get detailed info
             sgs.forEach(sg => {
-              let sgIndex = instance.Sg.findIndex(instanceSg => sg.GroupName === instanceSg.GroupName)
-              instance.Sg[sgIndex].allowRdpFrom = sg.IpPermissions
+              let sgIndex = instance.InstanceSg.findIndex(instanceSg => sg.GroupName === instanceSg.GroupName)
+              instance.InstanceSg[sgIndex].allowRdpFrom = sg.IpPermissions
                 .filter(rule => rule.ToPort === 3389)
                 .map(rule => rule.IpRanges)
 
-              instance.Sg[sgIndex].allowRdpFrom = instance.Sg[sgIndex].allowRdpFrom[0]
+              instance.InstanceSg[sgIndex].allowRdpFrom = instance.InstanceSg[sgIndex].allowRdpFrom[0]
 
               // Create a Easy array map with all Allowed ips
               let allowRdpFromResumed = sg.IpPermissions
@@ -120,18 +155,33 @@ export default {
             })
           })
           .then(() => {
+            commit('updateInstance', instance)
             resolve(instance)
           })
       })
     })
 
     return Promise.all(instancesJob).then(instances => {
-      commit('setInstance', instances)
       return instances
     })
   },
+  // Check if ip address exist in SG rules
+  checkMyIP ({state, commit, rootState}, instances = []) {
+    // If empty instances
+    if (instances.length < 1) instances = state.instances
+    if (instances.length < 1) throw new Error('Empty list!')
 
-  startInstance ({state}, instancesIds = []) {
+    // If not public IPO
+    if (!rootState.Shared.publicIp) throw new Error('Invalid public IP')
+
+    instances.forEach(instance => {
+      let findIP = instance.AllowRdpFromResumed.find(allowedIp => allowedIp === `${rootState.Shared.publicIp}/32`)
+      instance.needProtectIp = (!findIP)
+      commit('updateInstance', instance)
+    })
+  },
+
+  startInstance ({state, dispatch}, instancesIds = []) {
     if (instancesIds.length < 1) throw new Error('Empty list!')
     const params = {
       DryRun: false,
@@ -141,12 +191,13 @@ export default {
     return new Promise(resolve => {
       state.ec2.startInstances(params, function (err, data) {
         if (err) throw new Error(err.message)
+        dispatch('describeInstanceStatus', instancesIds)
         resolve(data)
       })
     })
   },
 
-  stopInstance ({state}, instancesIds = []) {
+  stopInstance ({state, dispatch}, instancesIds = []) {
     if (instancesIds.length < 1) throw new Error('Empty list!')
     const params = {
       DryRun: false,
@@ -156,6 +207,7 @@ export default {
     return new Promise(resolve => {
       state.ec2.stopInstances(params, function (err, data) {
         if (err) throw new Error(err.message)
+        dispatch('describeInstanceStatus', instancesIds)
         resolve(data)
       })
     })
