@@ -122,3 +122,41 @@ export default {
     })
   }
 }
+
+// export default {
+//   async registerAll ({dispatch}) {
+//     await dispatch('registerDatabase')
+//     await dispatch('registerDoc')
+//   },
+
+//   registerDatabase ({commit}) {
+//     return Auth.currentCredentials()
+//       .then(credentials => {
+//         if (!credentials) throw new Error('Invalid User Credentials!')
+
+//         const db = new DynamoDB({
+//           apiVersion: '2012-08-10',
+//           region: aws.DynamoDB.region,
+//           credentials: credentials,
+//           sessionToken: credentials
+//         })
+//         logger.debug('Database registered')
+//         commit('setDatabase', db)
+//       })
+//   },
+
+//   registerDoc ({commit, rootState}) {
+//     return Auth.currentCredentials()
+//       .then(credentials => {
+//         if (!credentials) throw new Error('Invalid User Credentials!')
+
+//         const doc = new DynamoDB.DocumentClient({
+//           apiVersion: '2012-08-10',
+//           region: aws.DynamoDB.region,
+//           credentials: credentials,
+//           sessionToken: credentials
+//         })
+//         logger.debug('Doc registered')
+//         return commit('setDocClient', doc)
+//       })
+//   }

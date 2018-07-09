@@ -37,6 +37,23 @@ export default {
     return ec2
   },
 
+  // registerEC2 ({commit}) {
+  //   return Auth.currentCredentials()
+  //     .then(credentials => {
+  //       if (!credentials) throw new Error('Invalid User Credentials!')
+
+  //       const ec2 = new EC2({
+  //         apiVersion: '2016-11-15',
+  //         region: aws.EC2.region,
+  //         credentials: credentials,
+  //         sessionToken: credentials
+  //       })
+  //       logger.debug('EC2 registered')
+  //       commit('setEC2', ec2)
+  //       return ec2
+  //     })
+  // },
+
   describeInstances ({state, commit}, instances = []) {
     if (!state.ec2) throw new Error('EC2 not registered!')
 

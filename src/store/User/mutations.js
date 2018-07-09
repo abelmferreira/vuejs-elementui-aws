@@ -5,6 +5,9 @@ export default {
   setUser (state, user) {
     state.user = user
   },
+  updateUserCredentials (state, credentials) {
+    Object.assign(state.user, credentials)
+  },
   setUserLogout (state) {
     state.loggedin = false
     state.token = null

@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import { Auth } from 'aws-amplify'
 
 import Store from '@/store'
 
@@ -90,16 +91,41 @@ const router = new Router({
   ]
 })
 
-router.beforeEach((to, from, next) => {
-  // If has problem with this logic... try action checkIfUserisAuthenticated
-  if ((to.meta.requiresAuth && Store.state.User.loggedin) || to.path.startsWith('/login')) {
-    next()
-  } else if (!to.meta.requiresAuth) {
-    next()
-  } else {
-    Store.commit('Alerts/setError', 'Need auth to continue')
-    next('/login')
-  }
-})
+const AuthFilter = (to, from, next) => {
+  Auth.currentAuthenticatedUser()
+    .then(user => {
+      Auth.currentCredentials()
+        .then(credentials => Store.commit('User/updateUserCredentials', Auth.essentialCredentials(credentials)))
+        .catch(err => { throw new Error('get current credentials err', err) })
+      next()
+    })
+    .catch(() => {
+      Store.commit('User/setUserLogout')
+
+      // If has problem with this logic... try action checkIfUserisAuthenticated
+      if (to.path.startsWith('/login')) {
+        next()
+      } else if (!to.meta.requiresAuth) {
+        next()
+      } else {
+        Store.commit('Alerts/setError', 'Need auth to continue')
+        next('/login')
+      }
+    })
+}
+
+router.beforeEach(AuthFilter)
+
+// router.beforeEach((to, from, next) => {
+//   // If has problem with this logic... try action checkIfUserisAuthenticated
+//   if ((to.meta.requiresAuth && Store.state.User.loggedin) || to.path.startsWith('/login')) {
+//     next()
+//   } else if (!to.meta.requiresAuth) {
+//     next()
+//   } else {
+//     Store.commit('Alerts/setError', 'Need auth to continue')
+//     next('/login')
+//   }
+// })
 
 export default router
