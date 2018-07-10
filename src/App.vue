@@ -39,6 +39,7 @@ export default {
   },
   watch: {
     error (value) {
+      console.log('new Error', value)
       if (value) this.$message({type: 'error', message: value, showClose: true, onClose: this.clearError, duration: 10000})
     },
     loading (value) {

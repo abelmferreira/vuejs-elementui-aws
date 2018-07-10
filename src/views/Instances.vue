@@ -26,7 +26,8 @@
         <template slot-scope="scope">
           {{ scope.row.Name }}<br>
           {{ scope.row.InstanceState }}<br>
-          {{ scope.row.LaunchTime }}<br>
+          {{ scope.row.LaunchTimeDate }}<br>
+          {{ scope.row.LaunchTimeTime }}<br>
         </template>
       </el-table-column>
 

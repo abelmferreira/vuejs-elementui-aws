@@ -33,6 +33,11 @@ export default {
     this.commit('Alerts/setLoadingMessage')
     state.error = payload
   },
+  // Used with after error has a redirect
+  setErrorTimeout (state, payload) {
+    this.commit('Alerts/setLoadingMessage')
+    setTimeout(() => { state.error = payload }, 2500)
+  },
   clearError (state) {
     state.error = false
   }

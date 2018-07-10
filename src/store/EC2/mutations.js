@@ -51,5 +51,9 @@ export default {
   },
   clearEC2 (state) {
     state.ec2 = null
+  },
+  clearEC2all (state) {
+    state.ec2 = null
+    state.instances = []
   }
 }

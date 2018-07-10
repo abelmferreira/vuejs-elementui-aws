@@ -98,7 +98,7 @@ const AuthFilter = (to, from, next) => {
     next()
   } else if (to.meta.requiresAuth && !Store.state.User.loggedin) {
     Store.commit('User/setUserLogout')
-    Store.commit('Alerts/setError', 'Need auth to continue')
+    Store.commit('Alerts/setErrorTimeout', `Need auth to access ${to.fullPath}`)
     next('/login')
   } else {
     Auth.currentAuthenticatedUser()
@@ -112,7 +112,7 @@ const AuthFilter = (to, from, next) => {
       .catch(err => {
         if (err) console.log('Not Auth!', err)
         Store.commit('User/setUserLogout')
-        Store.commit('Alerts/setError', 'Need auth to continue')
+        Store.commit('Alerts/setErrorTimeout', `Need auth to access ${to.fullPath}`)
         next('/login')
       })
   }

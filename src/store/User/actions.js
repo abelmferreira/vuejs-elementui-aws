@@ -27,6 +27,12 @@ const onNeedRedirect = (commit, user, to) => {
   router.push(to)
 }
 
+const onUserLogout = (commit) => {
+  commit('User/setUserLogout', null, {root: true})
+  commit('EC2/clearEC2all', null, {root: true})
+  commit('DynamoDB/clearDatabases', null, {root: true})
+}
+
 export default {
   userLogin ({commit, dispatch}, payload) {
     commit('Alerts/setLoadingMessage', 'Authenticating', {root: true})
@@ -67,7 +73,7 @@ export default {
         }
       })
       .catch(err => {
-        commit('setUserLogout')
+        onUserLogout(commit)
         onError(commit, err, 'userLogin Error')
         router.push('/login')
       })
@@ -87,7 +93,7 @@ export default {
 
     Auth.signOut()
       .then(() => {
-        commit('setUserLogout')
+        onUserLogout(commit)
         logger.debug('Logout Success!')
         router.push(routeAfterLogout)
       })

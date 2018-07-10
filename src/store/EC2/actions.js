@@ -70,6 +70,8 @@ export default {
             InstanceId: instance.InstanceId,
             InstanceType: instance.InstanceType,
             LaunchTime: timeConverter(instance.LaunchTime),
+            LaunchTimeDate: timeConverter(instance.LaunchTime).split(' ')[0],
+            LaunchTimeTime: timeConverter(instance.LaunchTime).split(' ')[1],
             PubIpAddress: instance.PublicIpAddress,
             IpAddress: instance.PrivateIpAddress,
             InstanceState: instance.State.Name,
@@ -192,7 +194,7 @@ export default {
     })
   },
 
-  startInstance ({state, dispatch}, instancesIds = []) {
+  startInstance ({state, dispatch, commit}, instancesIds = []) {
     if (instancesIds.length < 1) throw new Error('Empty list!')
     const params = {
       DryRun: false,
@@ -203,12 +205,13 @@ export default {
       state.ec2.startInstances(params, function (err, data) {
         if (err) throw new Error(err.message)
         dispatch('describeInstanceStatus', instancesIds)
+        commit('Alerts/addMessage', 'Instance starting', {root: true})
         resolve(data)
       })
     })
   },
 
-  stopInstance ({state, dispatch}, instancesIds = []) {
+  stopInstance ({state, dispatch, commit}, instancesIds = []) {
     if (instancesIds.length < 1) throw new Error('Empty list!')
     const params = {
       DryRun: false,
@@ -219,6 +222,7 @@ export default {
       state.ec2.stopInstances(params, function (err, data) {
         if (err) throw new Error(err.message)
         dispatch('describeInstanceStatus', instancesIds)
+        commit('Alerts/addMessage', 'Instance stopping', {root: true})
         resolve(data)
       })
     })
