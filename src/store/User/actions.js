@@ -74,14 +74,16 @@ export default {
   },
 
   userLogout ({commit, state, dispatch}) {
-    let cloneUser = { ...state.user }
+    let cloneUser = Object.assign({}, state.user)
 
-    dispatch('DynamoDB/log', {user: cloneUser, action: 'User logged out'}, {root: true})
-      .then(() => {
-        commit('DynamoDB/clearDatabases', null, {root: true})
-        commit('EC2/clearEC2', null, {root: true})
-      })
-      .catch(err => console.log('LogError', err))
+    if (cloneUser.loggedin) {
+      dispatch('DynamoDB/log', {user: cloneUser, action: 'User logged out'}, {root: true})
+        .then(() => {
+          commit('DynamoDB/clearDatabases', null, {root: true})
+          commit('EC2/clearEC2', null, {root: true})
+        })
+        .catch(err => console.log('LogError', err))
+    }
 
     Auth.signOut()
       .then(() => {

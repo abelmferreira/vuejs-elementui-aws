@@ -54,7 +54,16 @@ export default {
   //     })
   // },
 
-  describeInstances ({state, commit}, instances = []) {
+  fullDescribeInstance ({state, dispatch, commit}) {
+    commit('clearInstances')
+    return dispatch('registerEC2')
+      .then(ec2 => dispatch('describeInstances'))
+      .then(instances => dispatch('describeInstanceStatus'))
+      .then(instances => dispatch('describeInstancesSecurityGroup'))
+      .then(instances => state.instances)
+  },
+
+  describeInstances ({state, commit, dispatch}, instances = []) {
     if (!state.ec2) throw new Error('EC2 not registered!')
 
     const params = { DryRun: false }
@@ -68,8 +77,6 @@ export default {
 
         data.Reservations[0].Instances.forEach(instance => {
           let NameIndex = instance.Tags.findIndex(tag => tag.Key === 'name' || tag.Key === 'Name')
-
-          console.log(instance)
 
           // Create resumed respose data
           let singleInstanceData = {
@@ -96,6 +103,7 @@ export default {
 
   describeInstanceStatus ({commit, state}, instances = []) {
     if (!state.ec2) throw new Error('EC2 not registered!')
+    if (instances.length < 1) instances = state.instances.map(instance => instance.InstanceId)
     if (instances.length < 1) throw new Error('Empty list!')
 
     const params = {

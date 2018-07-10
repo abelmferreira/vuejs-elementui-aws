@@ -22,7 +22,7 @@ a {
 
 .main-container {
   text-align: center;
-  min-height: 50vh;
+  min-height: 80vh;
 }
 
 /* classes para os buttons de ação no final dos formulários */
@@ -89,7 +89,7 @@ a {
 
 /* altera o footer do element.io */
 .el-footer {
-  position: absolute;
+  position: relative;
   bottom:0;
   width:100%;
   border-top: solid 1px #e6e6e6;

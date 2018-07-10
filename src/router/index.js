@@ -92,26 +92,30 @@ const router = new Router({
 })
 
 const AuthFilter = (to, from, next) => {
-  Auth.currentAuthenticatedUser()
-    .then(user => {
-      Auth.currentCredentials()
-        .then(credentials => Store.commit('User/updateUserCredentials', Auth.essentialCredentials(credentials)))
-        .catch(err => { throw new Error('get current credentials err', err) })
-      next()
-    })
-    .catch(() => {
-      Store.commit('User/setUserLogout')
-
-      // If has problem with this logic... try action checkIfUserisAuthenticated
-      if (to.path.startsWith('/login')) {
+  if (to.path.startsWith('/login') || to.path.startsWith('/logout')) {
+    next()
+  } else if (!to.meta.requiresAuth) {
+    next()
+  } else if (to.meta.requiresAuth && !Store.state.User.loggedin) {
+    Store.commit('User/setUserLogout')
+    Store.commit('Alerts/setError', 'Need auth to continue')
+    next('/login')
+  } else {
+    Auth.currentAuthenticatedUser()
+      .then(user => {
+        Auth.currentCredentials()
+          .then(credentials => Auth.essentialCredentials(credentials))
+          .then(essentialCred => Store.commit('User/updateUserCredentials', essentialCred))
+          .catch(err => { throw new Error(err) })
         next()
-      } else if (!to.meta.requiresAuth) {
-        next()
-      } else {
+      })
+      .catch(err => {
+        if (err) console.log('Not Auth!', err)
+        Store.commit('User/setUserLogout')
         Store.commit('Alerts/setError', 'Need auth to continue')
         next('/login')
-      }
-    })
+      })
+  }
 }
 
 router.beforeEach(AuthFilter)

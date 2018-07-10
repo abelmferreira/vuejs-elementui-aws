@@ -6,8 +6,19 @@
     <el-card class="box-card" v-for="instance in instances" v-bind:key="instance.InstanceId">
       <div slot="header" class="clearfix">
         <span> {{ instance.Name }} ( {{ instance.InstanceState }} )</span>
-        <el-button v-if ="instance.InstanceState === 'stopped'" style="float: right; padding: 3px 0" @click="turnOn(instance.InstanceId)">Turn On</el-button>
-        <el-button v-if ="instance.InstanceState === 'running'" style="float: right; padding: 3px 0" @click="turnOff(instance.InstanceId)">Turn Off</el-button>
+
+          <el-button v-if ="instance.InstanceState === 'stopped' && !instance.isLoading"
+            style="float: right; padding: 3px 0"
+            @click="turnOn(instance.InstanceId)">
+            Turn On
+            </el-button>
+
+          <el-button v-if ="instance.InstanceState === 'running' && !instance.isLoading"
+            style="float: right; padding: 3px 0"
+            @click="turnOff(instance.InstanceId)">
+            Turn Off
+            </el-button>
+
         <el-button style="float: right; padding: 3px 0" @click="describeInstanceStatus([instance.InstanceId])">Refresh</el-button>
       </div>
       <div v-for="ip in instance.AllowRdpFromResumed" :key="ip" class="text item">
@@ -17,6 +28,9 @@
       <div class="text item"> Your public IP {{ publicIp }} </div>
       <el-button v-if ="instance.needProtectIp" @click="alloOnlyMyIP">Allow only from my IP</el-button>
     </el-card>
+    <pre>
+      {{ instances }}
+    </pre>
   </div>
 </template>
 
@@ -34,8 +48,7 @@ export default {
     ...mapState('Shared', ['publicIp'])
   },
   methods: {
-    ...mapActions('EC2', ['registerEC2', 'describeInstances', 'describeInstanceStatus', 'describeInstancesSecurityGroup']),
-    ...mapActions('EC2', ['startInstance', 'stopInstance', 'checkMyIP']),
+    ...mapActions('EC2', ['fullDescribeInstance', 'startInstance', 'stopInstance', 'checkMyIP', 'describeInstanceStatus']),
     ...mapActions('Shared', ['getMyPublicIP']),
     turnOn (id) {
       console.log('turnOn')
@@ -56,9 +69,7 @@ export default {
     }
   },
   mounted () {
-    this.registerEC2(this.user)
-      .then(ec2Conn => this.describeInstances())
-      .then(instances => this.describeInstancesSecurityGroup())
+    this.fullDescribeInstance()
       .then(instances => this.getMyPublicIP())
       .then(myPubIp => this.checkMyIP())
       .then(() => {
