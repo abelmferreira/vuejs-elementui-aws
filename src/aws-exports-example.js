@@ -43,5 +43,13 @@ export default {
         }
       }
     ]
+  },
+  // Custom configs for SDK, not included in aws-amplify
+  DynamoDB: {
+    table: 'dynamoDBTable_ame',
+    region: 'XX-XXXX-X'
+  },
+  EC2: {
+    region: 'XX-XXXX-X'
   }
 }
