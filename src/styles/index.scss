@@ -96,3 +96,26 @@ a {
   text-align: center;
   font-size: 12px;
 }
+
+/* table */
+.el-table th {
+  text-align: center;
+}
+
+.el-table .warning-row {
+  background: oldlace;
+}
+
+.el-table .success-row {
+  background: #f0f9eb;
+}
+
+/* pop over */
+.el-popover-custom {
+  text-align: center;
+}
+
+/* pop over */
+.el-popover-custom .el-popover__title {
+  font-weight: bold;
+}

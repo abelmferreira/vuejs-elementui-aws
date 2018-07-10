@@ -1,36 +1,61 @@
 <template>
   <div class="instancesView">
-    <h1>Instances page</h1>
+    <h1>Instances</h1>
     <br>
 
-    <el-card class="box-card" v-for="instance in instances" v-bind:key="instance.InstanceId">
-      <div slot="header" class="clearfix">
-        <span> {{ instance.Name }} ( {{ instance.InstanceState }} )</span>
+    <el-table :data="instances" style="width: 100%;" :row-class-name="tableRowClassName">
 
-          <el-button v-if ="instance.InstanceState === 'stopped' && !instance.isLoading"
-            style="float: right; padding: 3px 0"
-            @click="turnOn(instance.InstanceId)">
-            Turn On
-            </el-button>
+      <el-table-column type="expand">
+        <template slot-scope="props">
+          <div v-if="props.row.needProtectIp">
+            <span>Remote access alert!</span><br>
+            <span> RDP Remote access allowed from </span><br>
+            <p v-for="ip in props.row.AllowRdpFromResumed" :key="ip" class="text item"> {{ ip }} </p><br>
+            <el-button plain @click="alloOnlyMyIP(props.row.InstanceId)" icon="el-icon-warning" type="danger">Allow only from my IP</el-button><br><br>
+            <span> My IP is: {{ publicIp }} </span>
+          </div>
+          <div v-else>
+            <span>Server protected!!</span>
+            <span>RDP connections allowed only from {{ publicIp }}</span>
+          </div>
+        </template>
+      </el-table-column>
 
-          <el-button v-if ="instance.InstanceState === 'running' && !instance.isLoading"
-            style="float: right; padding: 3px 0"
-            @click="turnOff(instance.InstanceId)">
-            Turn Off
-            </el-button>
+      <el-table-column
+        label="Instance">
+        <template slot-scope="scope">
+          {{ scope.row.Name }}<br>
+          {{ scope.row.InstanceState }}<br>
+          {{ scope.row.LaunchTime }}<br>
+        </template>
+      </el-table-column>
 
-        <el-button style="float: right; padding: 3px 0" @click="describeInstanceStatus([instance.InstanceId])">Refresh</el-button>
-      </div>
-      <div v-for="ip in instance.AllowRdpFromResumed" :key="ip" class="text item">
-        RDP remote access allowed from {{ ip }}
-      </div>
-      <br>
-      <div class="text item"> Your public IP {{ publicIp }} </div>
-      <el-button v-if ="instance.needProtectIp" @click="alloOnlyMyIP">Allow only from my IP</el-button>
-    </el-card>
-    <pre>
-      {{ instances }}
-    </pre>
+      <el-table-column
+        fixed="right"
+        label="Actions" >
+        <template slot-scope="scope">
+
+          <el-button plain v-if="scope.row.InstanceState === 'stopped' && !scope.row.isLoading"
+            @click="turnOn(scope.row.InstanceId)"
+            icon="el-icon-upload2"
+            type="primary"/>
+
+          <el-button plain v-if="scope.row.InstanceState === 'running' && !scope.row.isLoading"
+            @click="turnOff(scope.row.InstanceId)"
+            icon="el-icon-download"
+            type="primary"/>
+
+          <el-button plain v-if="scope.row.isLoading"
+            :loading="scope.row.isLoading"
+            type="warning"/>
+
+          <el-button plain @click="describeInstanceStatus([scope.row.InstanceId])"
+            icon="el-icon-refresh"
+            type="info"/>
+
+        </template>
+      </el-table-column>
+    </el-table>
   </div>
 </template>
 
@@ -66,17 +91,26 @@ export default {
     },
     alloOnlyMyIP () {
       console.log('alloOnlyMyIP')
+    },
+    tableRowClassName ({row, rowIndex}) {
+      return (row.needProtectIp) ? 'warning-row' : 'success-row'
     }
   },
   mounted () {
     this.fullDescribeInstance()
       .then(instances => this.getMyPublicIP())
       .then(myPubIp => this.checkMyIP())
-      .then(() => {
-        console.log('allDone', this.instances)
-        console.log('publicIp', this.publicIp)
-      })
   }
 }
 
 </script>
+
+<style>
+  .el-table .warning-row {
+    background: oldlace;
+  }
+
+  .el-table .success-row {
+    background: #f0f9eb;
+  }
+</style>

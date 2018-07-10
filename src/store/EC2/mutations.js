@@ -10,7 +10,6 @@ export default {
       let updatedInstances = Object.assign([], state.instances)
       updatedInstances[instanceIndex] = instanceData
       state.instances = updatedInstances
-      console.log('setInstance', state.instances)
     }
   },
   updateInstance (state, instanceUpdate) {
@@ -24,8 +23,6 @@ export default {
       let instance = updatedInstances[instanceIndex]
       instance.isLoading = false
 
-      console.log('instanceUpdate', instance.InstanceState)
-
       if (instance.InstanceState === 'running' && (instance.InstanceStatus !== 'ok' || instance.SystemStatus !== 'ok')) {
         instance.isLoading = true
         instance.InstanceState = 'pending'
@@ -35,10 +32,7 @@ export default {
         instance.isLoading = true
       }
 
-      console.log('instanceUpdate', instance.InstanceState)
-
       state.instances = updatedInstances
-      console.log('updateInstance', state.instances)
     }
   },
   removeInstance (state, instanceId) {
@@ -51,11 +45,9 @@ export default {
 
     if (instanceIndex < 0) throw new Error('Instance not found in State')
     else state.instances.splice(instanceIndex, 1)
-    console.log('removeInstance', state.instances)
   },
   clearInstances (state) {
     state.instances = []
-    console.log('clearInstances', state.instances)
   },
   clearEC2 (state) {
     state.ec2 = null

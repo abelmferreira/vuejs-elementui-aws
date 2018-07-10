@@ -8,16 +8,19 @@ const logger = new Logger('EC2')
 // https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstances.html
 // https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html
 
-function timeConverter (unixTimestamp) {
-  const a = new Date(unixTimestamp * 1000)
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+function timeConverter (timestamp) {
+  const a = new Date(timestamp)
+  // const a = new Date(unixTimestamp * 1000)
+  // const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
   const year = a.getFullYear()
   const month = months[a.getMonth()]
-  const date = a.getDate()
+  const date = ('0' + a.getDate()).slice(-2)
   const hour = a.getHours()
   const min = a.getMinutes()
   const sec = a.getSeconds()
-  const time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec
+  // const time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec
+  const time = `${date}/${month}/${year} ${hour}:${min}:${sec}`
   return time
 }
 
@@ -36,23 +39,6 @@ export default {
     commit('setEC2', ec2)
     return ec2
   },
-
-  // registerEC2 ({commit}) {
-  //   return Auth.currentCredentials()
-  //     .then(credentials => {
-  //       if (!credentials) throw new Error('Invalid User Credentials!')
-
-  //       const ec2 = new EC2({
-  //         apiVersion: '2016-11-15',
-  //         region: aws.EC2.region,
-  //         credentials: credentials,
-  //         sessionToken: credentials
-  //       })
-  //       logger.debug('EC2 registered')
-  //       commit('setEC2', ec2)
-  //       return ec2
-  //     })
-  // },
 
   fullDescribeInstance ({state, dispatch, commit}) {
     commit('clearInstances')
