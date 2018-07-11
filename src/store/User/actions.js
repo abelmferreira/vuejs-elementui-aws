@@ -2,7 +2,7 @@ import { Auth, Logger, JS } from 'aws-amplify'
 import router from '@/router'
 
 const logger = new Logger('LoginAction')
-const routeAfterLogin = '/'
+const routeAfterLogin = '/instances'
 const routeAfterLogout = '/login'
 const routeAfterConfirm = '/'
 const routeToConfirmCode = '/login/confirm'
