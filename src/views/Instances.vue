@@ -7,14 +7,19 @@
 
       <el-table-column type="expand">
         <template slot-scope="props">
-          <div v-if="props.row.needProtectIp">
+          <div v-if="props.row.needProtectIp === true">
             <span>Remote access alert!</span><br>
             <span> RDP Remote access allowed from </span><br>
             <p v-for="ip in props.row.AllowRdpFromResumed" :key="ip" class="text item"> {{ ip }} </p><br>
             <el-button plain @click="alloOnlyMyIP(props.row.InstanceId)" icon="el-icon-warning" type="danger">Allow only from my IP</el-button><br><br>
             <span> My IP is: {{ publicIp }} </span>
           </div>
-          <div v-else>
+          <div v-if="props.row.needProtectIp === undefined">
+            <span> RDP Remote access allowed from </span><br>
+            <p v-for="ip in props.row.AllowRdpFromResumed" :key="ip" class="text item"> {{ ip }} </p><br>
+            <span style="color: red;"><b>Can not get your public IP, check browser blockers</b></span>
+          </div>
+          <div v-if="props.row.needProtectIp === false">
             <span>Server protected!!</span>
             <span>RDP connections allowed only from {{ publicIp }}</span>
           </div>
@@ -66,9 +71,7 @@ import {mapState, mapActions} from 'vuex'
 export default {
   name: 'Instances',
   data () {
-    return {
-      schedulerJobs: []
-    }
+    return {}
   },
   computed: {
     ...mapState('User', ['user']),
@@ -88,7 +91,7 @@ export default {
       console.log('alloOnlyMyIP')
     },
     tableRowClassName (row, rowIndex) {
-      if (!row.row.needProtectIp) return 'success-row'
+      if (row.row.needProtectIp === false) return 'success-row'
       else return 'warning-row'
     }
   },

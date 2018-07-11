@@ -17,6 +17,8 @@ export default {
           if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
             commit('setPublicIp', xmlhttp.responseText)
             resolve(xmlhttp.responseText)
+          } else {
+            commit('setPublicIp', null)
           }
         }
         xmlhttp.open('GET', myUrl, true)

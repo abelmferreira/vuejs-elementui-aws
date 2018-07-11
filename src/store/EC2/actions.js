@@ -203,11 +203,15 @@ export default {
     if (instances.length < 1) throw new Error('Empty list!')
 
     // If not public IPO
-    if (!rootState.Shared.publicIp) throw new Error('Invalid public IP')
+    // if (!rootState.Shared.publicIp) throw new Error('Invalid public IP')
 
     instances.forEach(instance => {
-      let findIP = instance.AllowRdpFromResumed.find(allowedIp => allowedIp === `${rootState.Shared.publicIp}/32`)
-      instance.needProtectIp = (!findIP)
+      if (!rootState.Shared.publicIp) {
+        instance.needProtectIp = undefined
+      } else {
+        let findIP = instance.AllowRdpFromResumed.find(allowedIp => allowedIp === `${rootState.Shared.publicIp}/32`)
+        instance.needProtectIp = (!findIP)
+      }
       commit('updateInstance', instance)
     })
   },
