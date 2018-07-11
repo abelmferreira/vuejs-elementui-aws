@@ -46,14 +46,41 @@ export default {
     if (instanceIndex < 0) throw new Error('Instance not found in State')
     else state.instances.splice(instanceIndex, 1)
   },
+
+  newScheduler (state, instanceId) {
+    state.scheduledJobs.push({ instance: instanceId, counter: 0, func: null })
+  },
+
+  addSchedulerCounter (state, instanceId) {
+    const index = state.scheduledJobs.findIndex(job => job.instance === instanceId)
+    state.scheduledJobs[index].counter++
+  },
+
+  addSchedulerFunction (state, payload) {
+    const index = state.scheduledJobs.findIndex(job => job.instance === payload.instanceID)
+    state.scheduledJobs[index].func = payload.funcId
+  },
+
+  deleteScheduler (state, instanceId) {
+    const index = state.scheduledJobs.findIndex(job => job.instance === instanceId)
+    if (index > -1) {
+      clearInterval(state.scheduledJobs[index].func)
+      state.scheduledJobs.splice(index, 1)
+    }
+  },
+
   clearInstances (state) {
     state.instances = []
   },
   clearEC2 (state) {
     state.ec2 = null
   },
+  clearScheduler (state) {
+    state.scheduledJobs = []
+  },
   clearEC2all (state) {
     state.ec2 = null
     state.instances = []
+    state.scheduledJobs = []
   }
 }

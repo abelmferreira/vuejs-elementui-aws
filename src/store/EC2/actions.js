@@ -121,6 +121,24 @@ export default {
     })
   },
 
+  describeInstanceStatusIsLoading ({state, dispatch}, instance = null) {
+    if (!state.ec2) throw new Error('EC2 not registered!')
+    if (!instance) throw new Error('Invalid Instance!')
+
+    return dispatch('describeInstanceStatus', [instance])
+      .then(instanceStatus => {
+        if (instanceStatus[0].InstanceState === 'running' && (instanceStatus[0].InstanceStatus !== 'ok' || instanceStatus[0].SystemStatus !== 'ok')) {
+          return true
+        } else if (instanceStatus[0].InstanceState === 'stopping') {
+          return true
+        } else if (instanceStatus[0].InstanceState === 'pending') {
+          return true
+        } else {
+          return false
+        }
+      })
+  },
+
   // Retrieve security group full data
   describeSecurityGroups ({state}, sgname = []) {
     const params = { DryRun: false }
@@ -226,6 +244,48 @@ export default {
         resolve(data)
       })
     })
+  },
+
+  // Scheduler refresh instance status after power on or off
+  scheduleStatusRefresh ({state, dispatch, commit}, instanceID) {
+    const interval = 10000
+    const maxCounter = 60
+
+    if (instanceID === 'reset') {
+      logger.debug('Reseting status refresh scheduler jobs')
+      if (state.scheduledJobs.length > 0) {
+        state.scheduledJobs.forEach(job => commit('deleteScheduler', job.instance))
+        state.instances.forEach(instance => {
+          if (instance.isLoading) dispatch('scheduleStatusRefresh', instance.InstanceId)
+        })
+      }
+
+      return true
+    }
+
+    const index = state.scheduledJobs.findIndex(job => job.instance === instanceID)
+    if (index > -1) return false // Don't allow duplicate scheduler
+
+    // Create a new scheduler job object
+    commit('newScheduler', instanceID)
+
+    const funcId = setInterval(() => {
+      const index = state.scheduledJobs.findIndex(job => job.instance === instanceID)
+      dispatch('describeInstanceStatusIsLoading', instanceID)
+        .then(isLoading => {
+          // Incress scheduler job counter
+          commit('addSchedulerCounter', instanceID)
+          logger.debug(`${state.scheduledJobs[index].counter} -> Instance ${instanceID} loading is ${isLoading}`)
+
+          // If loading stop or if get max counter
+          if (!isLoading || state.scheduledJobs[index].counter > maxCounter) {
+            commit('deleteScheduler', instanceID)
+          }
+        })
+    }, interval)
+
+    // Add to scheduler job object setInterval job ID
+    commit('addSchedulerFunction', {instanceID, funcId})
   }
 
 }

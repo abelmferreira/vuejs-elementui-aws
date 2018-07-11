@@ -66,7 +66,9 @@ import {mapState, mapActions} from 'vuex'
 export default {
   name: 'Instances',
   data () {
-    return {}
+    return {
+      schedulerJobs: []
+    }
   },
   computed: {
     ...mapState('User', ['user']),
@@ -74,26 +76,18 @@ export default {
     ...mapState('Shared', ['publicIp'])
   },
   methods: {
-    ...mapActions('EC2', ['fullDescribeInstance', 'startInstance', 'stopInstance', 'checkMyIP', 'describeInstanceStatus']),
+    ...mapActions('EC2', ['fullDescribeInstance', 'startInstance', 'stopInstance', 'checkMyIP', 'describeInstanceStatus', 'scheduleStatusRefresh']),
     ...mapActions('Shared', ['getMyPublicIP']),
     turnOn (id) {
-      console.log('turnOn')
-      this.startInstance([id])
-        .then(data => {
-          console.log('start', data)
-        })
+      this.startInstance([id]).then(data => this.scheduleStatusRefresh(id))
     },
     turnOff (id) {
-      console.log('turnOff')
-      this.stopInstance([id])
-        .then(data => {
-          console.log('stop', data)
-        })
+      this.stopInstance([id]).then(data => this.scheduleStatusRefresh(id))
     },
     alloOnlyMyIP () {
       console.log('alloOnlyMyIP')
     },
-    tableRowClassName ({row, rowIndex}) {
+    tableRowClassName (row, rowIndex) {
       return (row.needProtectIp) ? 'warning-row' : 'success-row'
     }
   },
@@ -101,6 +95,7 @@ export default {
     this.fullDescribeInstance()
       .then(instances => this.getMyPublicIP())
       .then(myPubIp => this.checkMyIP())
+      .then(() => this.scheduleStatusRefresh('reset'))
   }
 }
 
