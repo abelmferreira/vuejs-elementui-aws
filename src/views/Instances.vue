@@ -10,7 +10,7 @@
           <div v-if="props.row.needProtectIp === true">
             <span>Remote access alert!</span><br>
             <span> RDP Remote access allowed from </span><br>
-            <p v-for="ip in props.row.AllowRdpFromResumed" :key="ip" class="text item"> {{ ip }} </p><br>
+            <p v-for="(ip, index) in props.row.AllowRdpFromResumed" :key="index" class="text item"> {{ ip }} </p><br>
             <el-button plain @click="alloOnlyMyIP(props.row.InstanceId)" icon="el-icon-warning" type="danger">Allow only from my IP</el-button><br><br>
             <span> My IP is: {{ publicIp }} </span>
           </div>
@@ -79,7 +79,8 @@ export default {
     ...mapState('Shared', ['publicIp'])
   },
   methods: {
-    ...mapActions('EC2', ['fullDescribeInstance', 'startInstance', 'stopInstance', 'checkMyIP', 'describeInstanceStatus', 'scheduleStatusRefresh']),
+    ...mapActions('EC2', ['fullDescribeInstance', 'describeInstanceStatus', 'updateIngressRule']),
+    ...mapActions('EC2', ['startInstance', 'stopInstance', 'checkMyIP', 'scheduleStatusRefresh', 'updateIngressRule']),
     ...mapActions('Shared', ['getMyPublicIP']),
     turnOn (id) {
       this.startInstance([id]).then(data => this.scheduleStatusRefresh(id))
@@ -87,8 +88,8 @@ export default {
     turnOff (id) {
       this.stopInstance([id]).then(data => this.scheduleStatusRefresh(id))
     },
-    alloOnlyMyIP () {
-      console.log('alloOnlyMyIP')
+    alloOnlyMyIP (id) {
+      this.updateIngressRule({publicIp: this.publicIp, instanceId: id})
     },
     tableRowClassName (row, rowIndex) {
       if (row.row.needProtectIp === false) return 'success-row'

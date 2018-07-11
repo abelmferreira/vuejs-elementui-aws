@@ -170,19 +170,22 @@ export default {
             // For each SG Name... get detailed info
             sgs.forEach(sg => {
               let sgIndex = instance.InstanceSg.findIndex(instanceSg => sg.GroupName === instanceSg.GroupName)
-              instance.InstanceSg[sgIndex].allowRdpFrom = sg.IpPermissions
-                .filter(rule => rule.ToPort === 3389)
-                .map(rule => rule.IpRanges)
+              instance.InstanceSg[sgIndex].allowRdpFrom = []
 
-              instance.InstanceSg[sgIndex].allowRdpFrom = instance.InstanceSg[sgIndex].allowRdpFrom[0]
+              // Filter resumed rules of RDP access
+              sg.IpPermissions
+                .filter(rule => rule.FromPort === 3389 && rule.ToPort === 3389 && rule.IpProtocol === 'tcp')
+                .map(rule => {
+                  if (rule.IpRanges.length > 0) rule.IpRanges.forEach(ipv4 => instance.InstanceSg[sgIndex].allowRdpFrom.push(ipv4))
+                  if (rule.Ipv6Ranges.length > 0) rule.Ipv6Ranges.forEach(ipv6 => instance.InstanceSg[sgIndex].allowRdpFrom.push(ipv6))
+                })
 
               // Create a Easy array map with all Allowed ips
-              let allowRdpFromResumed = sg.IpPermissions
-                .filter(rule => rule.ToPort === 3389)
-                .map(rule => rule.IpRanges)
-                .map(rule => rule.map(item => item.CidrIp))
-
-              allowRdpFromResumed[0].forEach(ip => instance.AllowRdpFromResumed.push(ip))
+              instance.InstanceSg[sgIndex].allowRdpFrom
+                .map(rule => {
+                  if (rule.CidrIp) instance.AllowRdpFromResumed.push(rule.CidrIp)
+                  if (rule.CidrIpv6) instance.AllowRdpFromResumed.push(rule.CidrIpv6)
+                })
             })
           })
           .then(() => {
@@ -209,8 +212,11 @@ export default {
       if (!rootState.Shared.publicIp) {
         instance.needProtectIp = undefined
       } else {
-        let findIP = instance.AllowRdpFromResumed.find(allowedIp => allowedIp === `${rootState.Shared.publicIp}/32`)
-        instance.needProtectIp = (!findIP)
+        const findMyIP = instance.AllowRdpFromResumed.find(allowedIp => allowedIp === `${rootState.Shared.publicIp}/32`)
+        const findNotIP = instance.AllowRdpFromResumed.find(allowedIp => allowedIp !== `${rootState.Shared.publicIp}/32`)
+
+        if (findMyIP && !findNotIP) instance.needProtectIp = false
+        else instance.needProtectIp = true
       }
       commit('updateInstance', instance)
     })
@@ -247,6 +253,88 @@ export default {
         commit('Alerts/addMessage', 'Instance stopping', {root: true})
         resolve(data)
       })
+    })
+  },
+
+  updateIngressRule ({state, dispatch, commit}, payload) {
+    return dispatch('removeRDPIngressRule', payload)
+      .then(result => {
+        console.log('result remove', result)
+        return dispatch('addRDPIngressRule', payload)
+      })
+      .then(result => {
+        console.log('result add', result)
+        return dispatch('describeInstancesSecurityGroup')
+      })
+      .then(() => dispatch('checkMyIP'))
+  },
+
+  addRDPIngressRule ({state}, payload) {
+    let instance = state.instances.find(instance => instance.InstanceId === payload.instanceId)
+
+    let jobs = instance.InstanceSg.map(sg => {
+      return new Promise((resolve, reject) => {
+        let params = {
+          GroupId: sg.GroupId,
+          GroupName: sg.GroupName,
+          IpPermissions: [{
+            FromPort: 3389,
+            ToPort: 3389,
+            IpProtocol: 'tcp',
+            IpRanges: [{
+              CidrIp: `${payload.publicIp}/32`,
+              Description: 'RDP Access from app'
+            }]
+          }]
+        }
+
+        state.ec2.authorizeSecurityGroupIngress(params, function (err, data) {
+          if (err) throw new Error(err.message)
+          resolve(data)
+        })
+      })
+    })
+
+    return Promise.all(jobs).then(results => {
+      return results
+    })
+  },
+
+  removeRDPIngressRule ({state}, payload) {
+    let instance = state.instances.find(instance => instance.InstanceId === payload.instanceId)
+
+    let jobs = instance.InstanceSg.map(sg => {
+      return new Promise((resolve, reject) => {
+        let params = {
+          GroupId: sg.GroupId,
+          GroupName: sg.GroupName,
+          IpPermissions: [{
+            FromPort: 3389,
+            ToPort: 3389,
+            IpProtocol: 'tcp'
+          }]
+        }
+
+        // Create param structure with Ipv4 or Ipv6 objects
+        const IpRanges = sg.allowRdpFrom.filter(range => range.CidrIp)
+        const Ipv6Ranges = sg.allowRdpFrom.filter(range => range.CidrIpv6)
+
+        if (IpRanges.length) params.IpPermissions[0].IpRanges = IpRanges
+        if (Ipv6Ranges.length) params.IpPermissions[0].Ipv6Ranges = Ipv6Ranges
+
+        if (!IpRanges.length && !Ipv6Ranges.length) {
+          resolve(`No RDP rule at sg ${sg.GroupName}`)
+        } else {
+          state.ec2.revokeSecurityGroupIngress(params, function (err, data) {
+            if (err) throw new Error(err.message)
+            resolve(data)
+          })
+        }
+      })
+    })
+
+    return Promise.all(jobs).then(results => {
+      return results
     })
   },
 
@@ -295,38 +383,3 @@ export default {
   }
 
 }
-
-// Auth.currentCredentials()
-//   .then(credentials => {
-//     // console.log(this.user)
-
-//     const ec2 = new EC2({
-//       apiVersion: '2016-11-15',
-//       region: this.aws.EC2.region,
-//       credentials: Auth.essentialCredentials(credentials),
-//       sessionToken: Auth.essentialCredentials(credentials)
-//     })
-
-//     const params3 = {
-//       DryRun: false
-//     }
-
-//     let that = this
-
-//     ec2.describeInstances(params3, function (err, data) {
-//       if (err) console.log(err, err.message)
-//       else console.log(data)
-
-//       data.Reservations[0].Instances.forEach(instance => {
-//         that.instancesData.push({
-//           InstanceId: instance.InstanceId,
-//           InstanceType: instance.InstanceType,
-//           LaunchTime: timeConverter(instance.LaunchTime),
-//           IpAddress: instance.PublicIpAddress,
-//           State: instance.State.Name,
-//           StateReason: instance.StateReason.Message,
-//           Sg: instance.SecurityGroups
-//         })
-//       })
-//     })
-//   })
