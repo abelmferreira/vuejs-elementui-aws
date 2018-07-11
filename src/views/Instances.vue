@@ -88,7 +88,8 @@ export default {
       console.log('alloOnlyMyIP')
     },
     tableRowClassName (row, rowIndex) {
-      return (row.needProtectIp) ? 'warning-row' : 'success-row'
+      if (!row.row.needProtectIp) return 'success-row'
+      else return 'warning-row'
     }
   },
   mounted () {
