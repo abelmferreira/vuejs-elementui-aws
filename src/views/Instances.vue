@@ -26,13 +26,14 @@
         </template>
       </el-table-column>
 
-      <el-table-column
-        label="Instance">
+      <el-table-column label="Instance">
         <template slot-scope="scope">
-          {{ scope.row.Name }}<br>
-          {{ scope.row.InstanceState }}<br>
-          {{ scope.row.LaunchTimeDate }}<br>
-          {{ scope.row.LaunchTimeTime }}<br>
+          <div class="multipleLineRow">
+            <div> {{ scope.row.Name }} </div>
+            <div> {{ scope.row.InstanceState }} </div>
+            <div> {{ scope.row.LaunchTimeDate }} </div>
+            <div> {{ scope.row.LaunchTimeTime }} </div>
+          </div>
         </template>
       </el-table-column>
 
