@@ -255,6 +255,8 @@ export default {
       logger.debug('Reseting status refresh scheduler jobs')
       if (state.scheduledJobs.length > 0) {
         state.scheduledJobs.forEach(job => commit('deleteScheduler', job.instance))
+      }
+      if (state.instances.length > 0) {
         state.instances.forEach(instance => {
           if (instance.isLoading) dispatch('scheduleStatusRefresh', instance.InstanceId)
         })
