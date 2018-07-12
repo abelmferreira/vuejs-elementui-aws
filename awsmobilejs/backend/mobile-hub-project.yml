@@ -1,0 +1,92 @@
+--- !com.amazonaws.mobilehub.v0.Project 
+features:
+  content-delivery: !com.amazonaws.mobilehub.v0.ContentDelivery 
+    attributes:
+      enabled: true
+      visibility: public-global
+    components:
+      release: !com.amazonaws.mobilehub.v0.Bucket {}
+  mobile-analytics: !com.amazonaws.mobilehub.v0.Pinpoint 
+    components:
+      analytics: !com.amazonaws.mobilehub.v0.PinpointAnalytics {}
+  sign-in: !com.amazonaws.mobilehub.v0.SignIn 
+    attributes:
+      enabled: true
+      optional-sign-in: false
+    components:
+      sign-in-user-pools: !com.amazonaws.mobilehub.v0.UserPoolsIdentityProvider 
+        attributes:
+          alias-attributes:
+            - email
+            - preferred_username
+          mfa-configuration: OFF
+          name: userpool
+          password-policy: !com.amazonaws.mobilehub.ConvertibleMap 
+            min-length: 8
+            require-lower-case: true
+            require-numbers: true
+            require-symbols: false
+            require-upper-case: true
+  user-files: !com.amazonaws.mobilehub.v0.UserFiles 
+    attributes:
+      enabled: true
+      wildcard-cors-policy: true
+  database: !com.amazonaws.mobilehub.v0.Database 
+    components:
+      database-nosql: !com.amazonaws.mobilehub.v0.NoSQLDatabase 
+        tables:
+          - !com.amazonaws.mobilehub.v0.NoSQLTable 
+            attributes:
+              created_at_iso: S
+              username: S
+              action: S
+              message: S
+            hashKeyName: userId
+            hashKeyType: S
+            rangeKeyName: created_at_ts
+            rangeKeyType: N
+            tableName: ___DYNAMIC_PREFIX___-vuejs-app-logs
+            tablePrivacy: private
+            indexes: []
+  cloudlogic: !com.amazonaws.mobilehub.v0.CloudLogic 
+    components:
+      vuejs-app-logsCRUD: !com.amazonaws.mobilehub.v0.API 
+        attributes:
+          name: vuejs-app-logsCRUD
+          requires-signin: true
+        paths:
+          /vuejs-app-logs: !com.amazonaws.mobilehub.v0.Function 
+            name: vuejs-app-logs
+            codeFilename: uploads/vuejs-app-logs.zip
+            handler: lambda.handler
+            enableCORS: true
+            runtime: nodejs6.10
+            environment: {}
+          '/vuejs-app-logs/{proxy+}': !com.amazonaws.mobilehub.v0.Function 
+            name: vuejs-app-logs
+            codeFilename: uploads/vuejs-app-logs.zip
+            handler: lambda.handler
+            enableCORS: true
+            runtime: nodejs6.10
+            environment: {}
+      vuejs-app-instanceCRUD: !com.amazonaws.mobilehub.v0.API 
+        attributes:
+          name: vuejs-app-instanceCRUD
+          requires-signin: true
+        paths:
+          /instances: !com.amazonaws.mobilehub.v0.Function 
+            name: vuejs-app-instances
+            codeFilename: uploads/vuejs-app-instances.zip
+            handler: lambda.handler
+            enableCORS: true
+            runtime: nodejs6.10
+            environment: {}
+          '/instances/{proxy+}': !com.amazonaws.mobilehub.v0.Function 
+            name: vuejs-app-instances
+            codeFilename: uploads/vuejs-app-instances.zip
+            handler: lambda.handler
+            enableCORS: true
+            runtime: nodejs6.10
+            environment: {}
+name: ''
+region: us-west-1
