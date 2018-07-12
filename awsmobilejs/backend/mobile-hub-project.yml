@@ -6,6 +6,36 @@ features:
       visibility: public-global
     components:
       release: !com.amazonaws.mobilehub.v0.Bucket {}
+  database: !com.amazonaws.mobilehub.v0.Database 
+    components:
+      database-nosql: !com.amazonaws.mobilehub.v0.NoSQLDatabase 
+        tables:
+          - !com.amazonaws.mobilehub.v0.NoSQLTable 
+            attributes:
+              created_at_iso: S
+              username: S
+              action: S
+              message: S
+            hashKeyName: userId
+            hashKeyType: S
+            rangeKeyName: created_at_ts
+            rangeKeyType: N
+            tableName: ___DYNAMIC_PREFIX___-vuejs-app-logs
+            tablePrivacy: private
+            indexes: []
+          - !com.amazonaws.mobilehub.v0.NoSQLTable 
+            attributes:
+              created_at_ts: N
+              description: S
+              access_key: S
+              secret_key: S
+            hashKeyName: userId
+            hashKeyType: S
+            rangeKeyName: instance_id
+            rangeKeyType: S
+            tableName: ___DYNAMIC_PREFIX___-vuejs-app-instances
+            tablePrivacy: private
+            indexes: []
   mobile-analytics: !com.amazonaws.mobilehub.v0.Pinpoint 
     components:
       analytics: !com.amazonaws.mobilehub.v0.PinpointAnalytics {}
@@ -31,23 +61,6 @@ features:
     attributes:
       enabled: true
       wildcard-cors-policy: true
-  database: !com.amazonaws.mobilehub.v0.Database 
-    components:
-      database-nosql: !com.amazonaws.mobilehub.v0.NoSQLDatabase 
-        tables:
-          - !com.amazonaws.mobilehub.v0.NoSQLTable 
-            attributes:
-              created_at_iso: S
-              username: S
-              action: S
-              message: S
-            hashKeyName: userId
-            hashKeyType: S
-            rangeKeyName: created_at_ts
-            rangeKeyType: N
-            tableName: ___DYNAMIC_PREFIX___-vuejs-app-logs
-            tablePrivacy: private
-            indexes: []
   cloudlogic: !com.amazonaws.mobilehub.v0.CloudLogic 
     components:
       vuejs-app-logsCRUD: !com.amazonaws.mobilehub.v0.API 
@@ -55,7 +68,7 @@ features:
           name: vuejs-app-logsCRUD
           requires-signin: true
         paths:
-          /vuejs-app-logs: !com.amazonaws.mobilehub.v0.Function 
+          /logs: !com.amazonaws.mobilehub.v0.Function 
             name: vuejs-app-logs
             codeFilename: uploads/vuejs-app-logs.zip
             handler: lambda.handler
@@ -69,9 +82,9 @@ features:
             enableCORS: true
             runtime: nodejs6.10
             environment: {}
-      vuejs-app-instanceCRUD: !com.amazonaws.mobilehub.v0.API 
+      vuejs-app-instances: !com.amazonaws.mobilehub.v0.API 
         attributes:
-          name: vuejs-app-instanceCRUD
+          name: vuejs-app-instances
           requires-signin: true
         paths:
           /instances: !com.amazonaws.mobilehub.v0.Function 

@@ -9,46 +9,46 @@ See the License for the specific language governing permissions and limitations 
 const express = require('express')
 const bodyParser = require('body-parser')
 const AWS = require('aws-sdk')
-const awsServerlessExpressMiddleware = require('aws-serverless-express/middleware')
+const awsServerlessExpressMiddleware = require('aws-serverless-express/middleware');
 
-AWS.config.update({ region: process.env.REGION })
-const dynamodb = new AWS.DynamoDB.DocumentClient()
+AWS.config.update({ region: process.env.REGION });
+const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-const mhprefix = process.env.MOBILE_HUB_DYNAMIC_PREFIX
-let tableName = 'vuejs-app-logs'
-const hasDynamicPrefix = true
+const mhprefix  = process.env.MOBILE_HUB_DYNAMIC_PREFIX;
+let tableName = "vuejs-app-logs";
+const hasDynamicPrefix = true;
 
-const userIdPresent = true
-const partitionKeyName = 'userId'
-const partitionKeyType = 'S'
-const sortKeyName = 'created_at_ts'
-const sortKeyType = 'N'
-const hasSortKey = true
-const path = '/vuejs-app-logs'
+const userIdPresent = true;
+const partitionKeyName = "userId";
+const partitionKeyType = "S"
+const sortKeyName = "created_at_ts";
+const sortKeyType = "N";
+const hasSortKey = true;
+const path = "/vuejs-app-logs";
 
-// const awsmobile = {}
+const awsmobile = {}
 
 if (hasDynamicPrefix) {
-  tableName = mhprefix + '-' + tableName
-}
+  tableName = mhprefix + '-' + tableName;
+} 
 
-const UNAUTH = 'UNAUTH'
+const UNAUTH = 'UNAUTH';
 
 // declare a new express app
 var app = express()
-app.use(awsServerlessExpressMiddleware.eventContext({ deleteHeaders: false }), bodyParser.json(), function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*')
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+app.use(awsServerlessExpressMiddleware.eventContext({ deleteHeaders: false }), bodyParser.json(), function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*")
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
   next()
-})
+});
 
 // convert url string param to expected Type
 const convertUrlType = (param, type) => {
-  switch (type) {
-    case 'N':
-      return Number.parseInt(param)
+  switch(type) {
+    case "N":
+      return Number.parseInt(param);
     default:
-      return param
+      return param;
   }
 }
 
@@ -56,57 +56,57 @@ const convertUrlType = (param, type) => {
  * HTTP Get method for list objects *
  ********************************/
 
-app.get('/vuejs-app-logs', function (req, res) {
+app.get('/vuejs-app-logs', function(req, res) {
   var condition = {}
   condition[partitionKeyName] = {
     ComparisonOperator: 'EQ'
   }
-
+  
   if (userIdPresent && req.apiGateway) {
-    condition[partitionKeyName]['AttributeValueList'] = [ req.apiGateway.event.requestContext.identity.cognitoIdentityId || UNAUTH ]
+    condition[partitionKeyName]['AttributeValueList'] = [req.apiGateway.event.requestContext.identity.cognitoIdentityId || UNAUTH ];
   } else {
     try {
-      condition[partitionKeyName]['AttributeValueList'] = [ convertUrlType(req.params[partitionKeyName], partitionKeyType) ]
-    } catch (err) {
-      res.json({error: 'Wrong column type ' + err})
+      condition[partitionKeyName]['AttributeValueList'] = [ convertUrlType(req.params[partitionKeyName], partitionKeyType) ];
+    } catch(err) {
+      res.json({error: 'Wrong column type ' + err});
     }
   }
 
   let queryParams = {
     TableName: tableName,
     KeyConditions: condition
-  }
+  } 
 
   dynamodb.query(queryParams, (err, data) => {
     if (err) {
-      res.json({error: 'Could not load items: ' + err})
+      res.json({error: 'Could not load items: ' + err});
     } else {
-      res.json(data.Items)
+      res.json(data.Items);
     }
-  })
-})
+  });
+});
 
 /*****************************************
  * HTTP Get method for get single object *
  *****************************************/
 
-app.get('/vuejs-app-logs/object/:created_at_ts', function (req, res) {
-  var params = {}
+app.get('/vuejs-app-logs/object/:created_at_ts', function(req, res) {
+  var params = {};
   if (userIdPresent && req.apiGateway) {
-    params[partitionKeyName] = req.apiGateway.event.requestContext.identity.cognitoIdentityId || UNAUTH
+    params[partitionKeyName] = req.apiGateway.event.requestContext.identity.cognitoIdentityId || UNAUTH;
   } else {
-    params[partitionKeyName] = req.params[partitionKeyName]
+    params[partitionKeyName] = req.params[partitionKeyName];
     try {
-      params[partitionKeyName] = convertUrlType(req.params[partitionKeyName], partitionKeyType)
-    } catch (err) {
-      res.json({error: 'Wrong column type ' + err})
+      params[partitionKeyName] = convertUrlType(req.params[partitionKeyName], partitionKeyType);
+    } catch(err) {
+      res.json({error: 'Wrong column type ' + err});
     }
   }
   if (hasSortKey) {
     try {
-      params[sortKeyName] = convertUrlType(req.params[sortKeyName], sortKeyType)
-    } catch (err) {
-      res.json({error: 'Wrong column type ' + err})
+      params[sortKeyName] = convertUrlType(req.params[sortKeyName], sortKeyType);
+    } catch(err) {
+      res.json({error: 'Wrong column type ' + err});
     }
   }
 
@@ -115,26 +115,28 @@ app.get('/vuejs-app-logs/object/:created_at_ts', function (req, res) {
     Key: params
   }
 
-  dynamodb.get(getItemParams, (err, data) => {
-    if (err) {
-      res.json({error: 'Could not load items: ' + err.message})
+  dynamodb.get(getItemParams,(err, data) => {
+    if(err) {
+      res.json({error: 'Could not load items: ' + err.message});
     } else {
       if (data.Item) {
-        res.json(data.Item)
+        res.json(data.Item);
       } else {
-        res.json(data)
+        res.json(data) ;
       }
     }
-  })
-})
+  });
+});
+
 
 /************************************
 * HTTP put method for insert object *
 *************************************/
 
-app.put(path, function (req, res) {
+app.put(path, function(req, res) {
+  
   if (userIdPresent) {
-    req.body['userId'] = req.apiGateway.event.requestContext.identity.cognitoIdentityId || UNAUTH
+    req.body['userId'] = req.apiGateway.event.requestContext.identity.cognitoIdentityId || UNAUTH;
   }
 
   let putItemParams = {
@@ -142,21 +144,22 @@ app.put(path, function (req, res) {
     Item: req.body
   }
   dynamodb.put(putItemParams, (err, data) => {
-    if (err) {
-      res.json({error: err, url: req.url, body: req.body})
-    } else {
+    if(err) {
+      res.json({error: err, url: req.url, body: req.body});
+    } else{
       res.json({success: 'put call succeed!', url: req.url, data: data})
     }
-  })
-})
+  });
+});
 
 /************************************
 * HTTP post method for insert object *
 *************************************/
 
-app.post(path, function (req, res) {
+app.post(path, function(req, res) {
+  
   if (userIdPresent) {
-    req.body['userId'] = req.apiGateway.event.requestContext.identity.cognitoIdentityId || UNAUTH
+    req.body['userId'] = req.apiGateway.event.requestContext.identity.cognitoIdentityId || UNAUTH;
   }
 
   let putItemParams = {
@@ -164,35 +167,35 @@ app.post(path, function (req, res) {
     Item: req.body
   }
   dynamodb.put(putItemParams, (err, data) => {
-    if (err) {
-      res.json({error: err, url: req.url, body: req.body})
-    } else {
+    if(err) {
+      res.json({error: err, url: req.url, body: req.body});
+    } else{
       res.json({success: 'post call succeed!', url: req.url, data: data})
     }
-  })
-})
+  });
+});
 
 /**************************************
 * HTTP remove method to delete object *
 ***************************************/
 
-app.delete('/vuejs-app-logs/object/:created_at_ts', function (req, res) {
-  var params = {}
+app.delete('/vuejs-app-logs/object/:created_at_ts', function(req, res) {
+  var params = {};
   if (userIdPresent && req.apiGateway) {
-    params[partitionKeyName] = req.apiGateway.event.requestContext.identity.cognitoIdentityId || UNAUTH
+    params[partitionKeyName] = req.apiGateway.event.requestContext.identity.cognitoIdentityId || UNAUTH;
   } else {
-    params[partitionKeyName] = req.params[partitionKeyName]
-    try {
-      params[partitionKeyName] = convertUrlType(req.params[partitionKeyName], partitionKeyType)
-    } catch (err) {
-      res.json({error: 'Wrong column type ' + err})
+    params[partitionKeyName] = req.params[partitionKeyName];
+     try {
+      params[partitionKeyName] = convertUrlType(req.params[partitionKeyName], partitionKeyType);
+    } catch(err) {
+      res.json({error: 'Wrong column type ' + err});
     }
   }
   if (hasSortKey) {
     try {
-      params[sortKeyName] = convertUrlType(req.params[sortKeyName], sortKeyType)
-    } catch (err) {
-      res.json({error: 'Wrong column type ' + err})
+      params[sortKeyName] = convertUrlType(req.params[sortKeyName], sortKeyType);
+    } catch(err) {
+      res.json({error: 'Wrong column type ' + err});
     }
   }
 
@@ -200,18 +203,18 @@ app.delete('/vuejs-app-logs/object/:created_at_ts', function (req, res) {
     TableName: tableName,
     Key: params
   }
-  dynamodb.delete(removeItemParams, (err, data) => {
-    if (err) {
-      res.json({error: err, url: req.url})
+  dynamodb.delete(removeItemParams, (err, data)=> {
+    if(err) {
+      res.json({error: err, url: req.url});
     } else {
-      res.json({url: req.url, data: data})
+      res.json({url: req.url, data: data});
     }
-  })
-})
+  });
+});
 
-app.listen(3000, function () {
-  console.log('App started')
-})
+app.listen(3000, function() {
+    console.log("App started")
+});
 
 // Export the app object. When executing the application local this does nothing. However,
 // to port it to AWS Lambda we will create a wrapper around that will load the app from
