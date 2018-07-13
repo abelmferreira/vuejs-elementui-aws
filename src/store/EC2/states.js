@@ -1,5 +1,6 @@
 export default {
   ec2: null,
   instances: [],
-  scheduledJobs: []
+  scheduledJobs: [],
+  unauthorized: false
 }

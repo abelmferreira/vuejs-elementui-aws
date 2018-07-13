@@ -3,6 +3,15 @@
     <h1>Instances</h1>
     <br>
 
+    <span ></span>
+    <el-alert
+      v-if="unauthorized"
+      title="Unauthorized access to EC2 api"
+      type="error"
+      description="Your aws infrastructure is not configured to allow access to aws ec2 apis, please check documentation."
+      show-icon>
+    </el-alert>
+
     <el-table :data="instances" style="width: 100%;" :row-class-name="tableRowClassName">
 
       <el-table-column type="expand">
@@ -42,23 +51,29 @@
         label="Actions" >
         <template slot-scope="scope">
 
-          <el-button plain v-if="scope.row.InstanceState === 'stopped' && !scope.row.isLoading"
-            @click="turnOn(scope.row.InstanceId)"
-            icon="el-icon-upload2"
-            type="primary"/>
+          <el-tooltip class="item" effect="dark" content="Power on" placement="top-start">
+            <el-button plain v-if="scope.row.InstanceState === 'stopped' && !scope.row.isLoading"
+              @click="turnOn(scope.row.InstanceId)"
+              icon="el-icon-upload2"
+              type="primary"/>
+          </el-tooltip>
 
-          <el-button plain v-if="scope.row.InstanceState === 'running' && !scope.row.isLoading"
-            @click="turnOff(scope.row.InstanceId)"
-            icon="el-icon-download"
-            type="primary"/>
+          <el-tooltip class="item" effect="dark" content="Power off" placement="top-start">
+            <el-button plain v-if="scope.row.InstanceState === 'running' && !scope.row.isLoading"
+              @click="turnOff(scope.row.InstanceId)"
+              icon="el-icon-download"
+              type="primary"/>
+          </el-tooltip>
 
           <el-button plain v-if="scope.row.isLoading"
             :loading="scope.row.isLoading"
             type="warning"/>
 
-          <el-button plain @click="describeInstanceStatus([scope.row.InstanceId])"
-            icon="el-icon-refresh"
-            type="info"/>
+          <el-tooltip class="item" effect="dark" content="Refresh" placement="top-start">
+            <el-button plain @click="describeInstanceStatus([scope.row.InstanceId])"
+              icon="el-icon-refresh"
+              type="info"/>
+          </el-tooltip>
 
         </template>
       </el-table-column>
@@ -76,7 +91,7 @@ export default {
   },
   computed: {
     ...mapState('User', ['user']),
-    ...mapState('EC2', ['instances']),
+    ...mapState('EC2', ['instances', 'unauthorized']),
     ...mapState('Shared', ['publicIp'])
   },
   methods: {

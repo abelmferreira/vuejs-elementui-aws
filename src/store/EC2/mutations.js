@@ -2,6 +2,9 @@ export default {
   setEC2 (state, ec2) {
     state.ec2 = ec2
   },
+  setUnauthorized (state, status = false) {
+    state.unauthorized = status
+  },
   setInstance (state, instanceData) {
     let instanceIndex = state.instances.findIndex(instance => instance.InstanceId === instanceData.InstanceId)
     if (instanceIndex < 0) {

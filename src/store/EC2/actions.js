@@ -31,7 +31,7 @@ export default {
 
     const ec2 = new EC2({
       apiVersion: '2016-11-15',
-      region: aws.EC2.region,
+      region: aws.aws_ec2_region,
       credentials: credentials,
       sessionToken: credentials
     })
@@ -42,6 +42,7 @@ export default {
 
   fullDescribeInstance ({state, dispatch, commit}) {
     commit('clearInstances')
+
     return dispatch('registerEC2')
       .then(ec2 => dispatch('describeInstances'))
       .then(instances => dispatch('describeInstanceStatus'))
@@ -57,7 +58,12 @@ export default {
 
     return new Promise(resolve => {
       state.ec2.describeInstances(params, function (err, data) {
-        if (err) throw new Error(err)
+        if (err) {
+          commit('setUnauthorized', true)
+          throw new Error(err)
+        } else {
+          commit('setUnauthorized', false)
+        }
 
         let allInstancesData = []
 
