@@ -110,7 +110,7 @@ const AuthFilter = (to, from, next) => {
         next()
       })
       .catch(err => {
-        if (err) console.log('Not Auth!', err)
+        if (err) throw new Error(err)
         Store.commit('User/setUserLogout')
         Store.commit('Alerts/setErrorTimeout', `Need auth to access ${to.fullPath}`)
         next('/login')

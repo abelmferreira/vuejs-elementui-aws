@@ -259,11 +259,9 @@ export default {
   updateIngressRule ({state, dispatch, commit}, payload) {
     return dispatch('removeRDPIngressRule', payload)
       .then(result => {
-        console.log('result remove', result)
         return dispatch('addRDPIngressRule', payload)
       })
       .then(result => {
-        console.log('result add', result)
         return dispatch('describeInstancesSecurityGroup')
       })
       .then(() => dispatch('checkMyIP'))

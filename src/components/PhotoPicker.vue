@@ -84,7 +84,7 @@ export default {
   },
   methods: {
     getPhoto: function () {
-      console.log(`get foto`, this.path)
+      logger.debug(`get foto`, this.path)
       Storage.get(this.path, { level: 'protected' })
         .then(url => { this.src = url })
     },

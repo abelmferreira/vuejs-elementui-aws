@@ -88,7 +88,7 @@ export default {
           commit('DynamoDB/clearDatabases', null, {root: true})
           commit('EC2/clearEC2', null, {root: true})
         })
-        .catch(err => console.log('LogError', err))
+        .catch(err => { throw new Error('LogError', err) })
     }
 
     Auth.signOut()
@@ -119,7 +119,6 @@ export default {
   },
 
   userUpdateAttributes ({commit}, payload) {
-    console.log(payload)
     return Auth.updateUserAttributes(payload.user, {
       phone_number: payload.form.phone_number,
       given_name: payload.form.given_name,

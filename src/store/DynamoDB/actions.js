@@ -49,7 +49,7 @@ export default {
     if (!table) table = aws.DynamoDB.table
 
     return state.db.describeTable({TableName: table}, (err, data) => {
-      if (err) console.log(err.message)
+      if (err) throw new Error(err.message)
       return data
     })
   },
@@ -69,7 +69,7 @@ export default {
     }
 
     return state.doc.query(params, (err, data) => {
-      if (err) console.log(err.message)
+      if (err) throw new Error(err.message)
       return data
     })
   },
@@ -95,7 +95,7 @@ export default {
     }
 
     return state.doc.put(params, (err, data) => {
-      if (err) console.log(err.message)
+      if (err) throw new Error(err.message)
       return data
     })
   },

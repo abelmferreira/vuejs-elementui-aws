@@ -67,7 +67,6 @@ export default {
   },
   computed: {
     userId () {
-      console.log(this.user)
       return this.user.id
     },
     ...mapState('User', ['loggedin', 'user'])
