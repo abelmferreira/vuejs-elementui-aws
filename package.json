@@ -5,7 +5,11 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "lint-aws-exports": "eslint --fix ./src/aws-exports.js",
+    "push-aws": "awsmobile push && npm run lint-aws-exports",
+    "deploy-aws": "awsmobile publish",
+    "deploy": "npm run lint-aws-exports && npm run deploy-aws"
   },
   "dependencies": {
     "aws-amplify": "^0.4.8",
