@@ -28,4 +28,5 @@ aws-exports.*
 awsmobilejs/.awsmobile/backend-build
 awsmobilejs/\#current-backend-info
 ~awsmobilejs-*/
+!awsmobilejs/backend/mobile-hub-project.yml
 awsmobilejs/*
