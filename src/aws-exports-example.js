@@ -1,55 +1,37 @@
-export default {
+// References links
+// https://aws-amplify.github.io/amplify-js/media/authentication_guide
+// https://aws.github.io/aws-amplify/media/storage_guide
+// https://aws-amplify.github.io/amplify-js/media/analytics_guide
+// https://aws.github.io/aws-amplify/media/api_guide
 
-  // https://aws.github.io/aws-amplify/media/storage_guide
-  Auth: {
-    // REQUIRED - Amazon Cognito Identity Pool ID
-    identityPoolId: 'XX-XXXX-X:XXXXXXXX-XXXX-1234-abcd-1234567890ab',
-    // REQUIRED - Amazon Cognito Region
-    region: 'XX-XXXX-X',
-    // OPTIONAL - Amazon Cognito User Pool ID
-    userPoolId: 'XX-XXXX-X_abcd1234',
-    // OPTIONAL - Amazon Cognito Web Client ID
-    userPoolWebClientId: 'a1b2c3d4e5f6g7h8i9j0k1l2m3'
-  },
-
-  // https://aws.github.io/aws-amplify/media/storage_guide
-  Analytics: {
-    // OPTIONAL -  Amazon Pinpoint App Client ID
-    appId: 'c168dadb756341dc84b78343e46d91da',
-    // OPTIONAL -  Amazon service region
-    region: 'XX-XXXX-X'
-  },
-
-  // https://aws.github.io/aws-amplify/media/storage_guide
-  Storage: {
-    // REQUIRED -  Amazon S3 bucket
-    bucket: '',
-    // OPTIONAL -  Amazon service region
-    region: 'XX-XXXX-X'
-  },
-
-  // https://aws.github.io/aws-amplify/media/api_guide
-  API: {
-    endpoints: [
-      {
-        name: 'MyCustomLambdaApi',
-        endpoint: 'https://lambda.us-east-1.amazonaws.com/2015-03-31/functions/yourFuncName/invocations',
-        service: 'lambda',
-        region: 'us-east-1',
-        custom_header: async () => {
-          return { Authorization: 'token' }
-          // Alternatively, with Cognito User Pools use this:
-          // return { (await Auth.currentSession()).idToken.jwtToken }
-        }
-      }
-    ]
-  },
-  // Custom configs for SDK, not included in aws-amplify
-  DynamoDB: {
-    table: 'dynamoDBTable_ame',
-    region: 'XX-XXXX-X'
-  },
-  EC2: {
-    region: 'XX-XXXX-X'
-  }
+const awsmobile = {
+  'aws_app_analytics': 'enable',
+  'aws_cognito_identity_pool_id': 'us-west-2:a5e6asda-asd-123-asd12-dc32ce9a8a54',
+  'aws_cognito_region': 'us-west-2',
+  'aws_content_delivery': 'enable',
+  'aws_content_delivery_bucket': 'vuejselementuiaws-hosting-mobilehub-23424234',
+  'aws_content_delivery_bucket_region': 'us-west-1',
+  'aws_content_delivery_cloudfront': 'enable',
+  'aws_content_delivery_cloudfront_domain': 'd24fkbb6drgybb.cloudfront.net',
+  'aws_dynamodb': 'enable',
+  'aws_dynamodb_all_tables_region': 'us-west-1',
+  'aws_dynamodb_table_schemas': [{'tableName': 'vuejselementuiaws-mobilehub-2342342-logs', 'attributes': [{'name': 'userId', 'type': 'S'}, {'name': 'created_at_ts', 'type': 'N'}, {'name': 'action', 'type': 'S'}, {'name': 'username', 'type': 'S'}], 'indexes': [], 'region': 'us-west-1', 'hashKey': 'userId', 'rangeKey': 'created_at_ts'}],
+  'aws_mandatory_sign_in': 'enable',
+  'aws_mobile_analytics_app_id': 'e89951ff6417409aba9d8c20a3f65372',
+  'aws_mobile_analytics_app_region': 'us-east-1',
+  'aws_project_id': '46635asdasd-adasd-asdasd-eb409df2',
+  'aws_project_name': 'vuejs-elementui-aws-2018-07-13-18-28-30',
+  'aws_project_region': 'us-west-1',
+  'aws_resource_name_prefix': 'vuejselementuiaws-mobilehub-118434234234022567',
+  'aws_sign_in_enabled': 'enable',
+  'aws_user_files': 'enable',
+  'aws_user_files_s3_bucket': 'vuejselementuiaws-userfiles-mobilehub-23423424234',
+  'aws_user_files_s3_bucket_region': 'us-west-1',
+  'aws_user_pools': 'enable',
+  'aws_user_pools_id': 'us-west-2_OCEjxgc6P',
+  'aws_user_pools_mfa_type': 'OFF',
+  'aws_user_pools_web_client_id': '3422434234234',
+  'aws_ec2_region': 'us-east-1'
 }
+
+export default awsmobile
