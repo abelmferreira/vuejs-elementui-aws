@@ -23,7 +23,7 @@ export default {
 
     const db = new DynamoDB({
       apiVersion: '2012-08-10',
-      region: aws.DynamoDB.region,
+      region: aws.aws_dynamodb_all_tables_region,
       credentials: credentials,
       sessionToken: credentials
     })
@@ -36,7 +36,7 @@ export default {
 
     const doc = new DynamoDB.DocumentClient({
       apiVersion: '2012-08-10',
-      region: aws.DynamoDB.region,
+      region: aws.aws_dynamodb_all_tables_region,
       credentials: credentials,
       sessionToken: credentials
     })
@@ -46,7 +46,7 @@ export default {
 
   describeTable ({state}, table) {
     if (!state.db) throw new Error('Database not registered!')
-    if (!table) table = aws.DynamoDB.table
+    if (!table) table = aws.aws_dynamodb_table_schemas[0].tableName
 
     return state.db.describeTable({TableName: table}, (err, data) => {
       if (err) throw new Error(err.message)
@@ -58,7 +58,7 @@ export default {
     if (!state.doc) throw new Error('Doc not registered!')
 
     const params = {
-      TableName: aws.DynamoDB.region,
+      TableName: aws.aws_dynamodb_table_schemas[0].tableName,
       KeyConditionExpression: `#uid = :authUid`,
       ExpressionAttributeNames: {
         '#uid': 'userId'
@@ -83,15 +83,15 @@ export default {
       'userId': payload.user.id,
       'username': payload.user.username,
       'action': 'newItem',
-      'created_at_ts': (date.getTime()),
-      'created_at_iso': (date.toISOString())
+      'created_at_ts': (date.getTime())
+      // 'created_at_iso': (date.toISOString())
     }
 
     newItem = Object.assign(newItem, payload.item)
 
     const params = {
       Item: newItem,
-      TableName: aws.DynamoDB.table
+      TableName: aws.aws_dynamodb_table_schemas[0].tableName
     }
 
     return state.doc.put(params, (err, data) => {
@@ -101,6 +101,8 @@ export default {
   },
 
   log ({state, dispatch}, payload) {
+    if (aws.aws_dynamodb !== 'enable') return
+
     dispatch('registerDoc', payload.user)
 
     if (!state.doc) throw new Error('Doc not registered!')
@@ -113,7 +115,7 @@ export default {
         'created_at_ts': (date.getTime()),
         'created_at_iso': (date.toISOString())
       },
-      TableName: aws.DynamoDB.table
+      TableName: aws.aws_dynamodb_table_schemas[0].tableName
     }
 
     return state.doc.put(params, (err, data) => {
