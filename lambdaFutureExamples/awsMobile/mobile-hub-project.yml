@@ -69,14 +69,14 @@ features:
           requires-signin: true
         paths:
           /logs: !com.amazonaws.mobilehub.v0.Function 
-            name: vuejs-app-logs
+            name: vuejsAppLogs
             codeFilename: uploads/vuejs-app-logs.zip
             handler: lambda.handler
             enableCORS: true
             runtime: nodejs6.10
             environment: {}
           '/vuejs-app-logs/{proxy+}': !com.amazonaws.mobilehub.v0.Function 
-            name: vuejs-app-logs
+            name: vuejsAppLogs
             codeFilename: uploads/vuejs-app-logs.zip
             handler: lambda.handler
             enableCORS: true
@@ -88,18 +88,18 @@ features:
           requires-signin: true
         paths:
           /instances: !com.amazonaws.mobilehub.v0.Function 
-            name: vuejs-app-instances
+            name: vuejsAppInstances
             codeFilename: uploads/vuejs-app-instances.zip
             handler: lambda.handler
             enableCORS: true
             runtime: nodejs6.10
             environment: {}
           '/instances/{proxy+}': !com.amazonaws.mobilehub.v0.Function 
-            name: vuejs-app-instances
+            name: vuejsAppInstances
             codeFilename: uploads/vuejs-app-instances.zip
             handler: lambda.handler
             enableCORS: true
             runtime: nodejs6.10
             environment: {}
 name: ''
-region: us-west-1
+region: us-east-1
