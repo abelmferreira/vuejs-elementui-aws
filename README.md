@@ -62,7 +62,7 @@ Basic and easy way to deploy your files do AWS and configure S3, Cognito, Cloud 
 # serve at localhost:8080
   npm run dev
 
-$ deploy to aWS
+$ deploy to AWS
   npm run deploy
 ````
 
@@ -106,6 +106,16 @@ Then find the role created by awsmobile cli, it will have your project name plus
             "Resource": "arn:aws:ec2:<INSTANCES_REGION OR *>:<YOU_ACCOUNT_ID OR *>:security-group/*"
         }
     ]
+}
+````
+
+Then add to aws-exports.js
+
+````js
+const awsmobile = {
+  ...
+  'aws_ec2_region': 'YOUR REGION'
+  ...
 }
 ````
 
